@@ -1,4 +1,3 @@
-// 시나리오 텍스트 배열
 const scenarioTexts = [
     "2100년, 지구에 쓰레기가 가득 차버려 우주에 쏘아올린지 38년째...",
     "가득 떠도는 우주 쓰레기로 인해 위성의 궤도가 뒤틀렸다...",
@@ -57,11 +56,11 @@ function endScenario() {
 }
 
 const starPositions = [
-    { top: "50px", left: "120px" },   // 왼쪽 위
-    { top: "320px", left: "60px" }, // 왼쪽 중간
-    { top: "120px", left: "600px" }, // 달 근처
-    { top: "230px", left: "680px" }, // 산 위
-    { top: "250px", left: "300px" }  // 아래
+    { top: "50px", left: "120px" },
+    { top: "320px", left: "60px" },
+    { top: "120px", left: "600px" },
+    { top: "230px", left: "680px" },
+    { top: "250px", left: "300px" }
   ];
   
   const $starContainer = $("<div>").addClass("star-container");

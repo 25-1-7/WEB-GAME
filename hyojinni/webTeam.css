@@ -21,11 +21,11 @@
 
 .wrapper {
     display: flex;
-    justify-content: center;   /* 가로 중앙 */
-    align-items: center;       /* 세로 중앙 */
+    justify-content: center;
+    align-items: center;
     flex-direction: column;
     width: 800px;
-    height: 500px;             /* 화면 전체 높이 */
+    height: 500px;
     background-image: url("space_bg.jpg");
     background-size: cover;
     background-position: center;
@@ -104,7 +104,6 @@ body {
     background-position: center;
     z-index: 0;
 
-    /* ✅ 밝기 조절 준비 */
     filter: brightness(1);
     transition: filter 1s ease-in-out;
 }
@@ -139,8 +138,8 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    pointer-events: none; /* 클릭 방지 */
-    z-index: 2;            /* content 위로 */
+    pointer-events: none;
+    z-index: 2; 
 }
 
 .star-container {
