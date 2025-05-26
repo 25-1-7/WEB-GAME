@@ -1,0 +1,210 @@
+.title {
+    text-align: center;
+    font-size: 90px;
+    line-height: 350px;
+    font-family: 'DungGeunMo';
+    color:rgb(253, 219, 48);
+    font-weight: bold;
+    animation: blink 1.5s infinite;
+
+    text-shadow:
+        -2px -2px 0 white,
+        2px -2px 0 #000,
+        -2px 2px 0 #000,
+        2px 2px 0 #000;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+.wrapper {
+    display: flex;
+    justify-content: center;   /* 가로 중앙 */
+    align-items: center;       /* 세로 중앙 */
+    flex-direction: column;
+    width: 800px;
+    height: 500px;             /* 화면 전체 높이 */
+    background-image: url("space_bg.jpg");
+    background-size: cover;
+    background-position: center;
+    margin: 100px auto;
+}
+
+
+body {
+    margin: 100px auto;
+}
+
+@font-face {
+    font-family: 'DungGeunMo';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/DungGeunMo.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+.menu {
+    padding: 50px 0;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 120px;
+    margin-top: 0px;
+    text-shadow:
+        -2px -2px 0 white,
+        2px -2px 0 #000,
+        -2px 2px 0 #000,
+        2px 2px 0 #000;
+}
+
+.menu-item {
+    font-family: 'DungGeunMo';
+    font-size: 36px;
+    color:rgb(253, 219, 48);
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.scenario {
+    width: 500px;
+    margin: 0 auto;
+    text-align: center;
+    color: white;
+    font-family: 'DungGeunMo';
+}
+
+.scenario-img {
+    width: 450px;
+    height: 250px;
+    object-fit: cover;
+    display: block;
+    margin: 0 auto;
+}
+
+
+.scenario-text {
+    margin-top: 20px;
+    font-size: 15px;
+    line-height: 1.4;
+}
+
+.hidden {
+    display: none;
+}
+
+.background {
+    position: relative;
+    width: 800px;
+    height: 500px;
+    position: absolute;
+    background-image: url("space_bg.jpg");
+    background-size: cover;
+    background-position: center;
+    z-index: 0;
+
+    /* ✅ 밝기 조절 준비 */
+    filter: brightness(1);
+    transition: filter 1s ease-in-out;
+}
+
+.content {
+    z-index: 1;
+}
+
+
+.scenario-links {
+    margin-top: 10px;
+    display: flex;
+    justify-content: flex-end;  /* 오른쪽 정렬 */
+    gap: 30px;
+}
+
+.link-text {
+    font-family: 'DungGeunMo';
+    font-size: 20px;
+    color: white;
+    cursor: pointer;
+    user-select: none;
+    transition: opacity 0.2s;
+}
+
+.link-text:hover {
+    opacity: 0.7;
+}
+.star-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* 클릭 방지 */
+    z-index: 2;            /* content 위로 */
+}
+
+.star-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 2;
+  }
+  
+  .star {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    animation: pulse 1.8s infinite ease-in-out;
+    transform-origin: center;
+  }
+  
+  @keyframes pulse {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.2);
+    }
+  }
+  
+  .credit-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 99;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .credit-popup {
+    background: white;
+    color: black;
+    padding: 30px;
+    border-radius: 10px;
+    width: 300px;
+    font-family: 'DungGeunMo';
+    text-align: center;
+    position: relative;
+    box-shadow: 0 0 15px #000;
+  }
+  
+  .credit-close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 24px;
+    cursor: pointer;
+    color: black;
+  }
+  
+  .hidden {
+    display: none;
+  }
+  
