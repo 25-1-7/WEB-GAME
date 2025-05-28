@@ -1,54 +1,99 @@
-<!DOCTYPE html>
-<html lang="ko">
+<!-- 
+파일명: space_cleaner.html
+작성자: 이지환 (Jihwan Lee)
+작성일: 2025년 5월 28일
+설명: 본 파일은 JavaScript 기반 캔버스 게임 'SPACE CLEANER'의 전체 코드로,
+사용자가 마우스로 조종하는 네 방향 패들로 우주 쓰레기를 반사시키며 처리하는 벽돌깨기 스타일의 게임의 프로토타입입니다.
+아래엔 원활한 팀원간의 이해를 위한 주석과 활용 가이드가 포함되어 있습니다.
+
+주요 개념:
+- HTML5 Canvas API로 게임 화면 구성
+- JavaScript를 통한 애니메이션 루프(draw)
+- DOM 요소 조작을 통한 인터페이스 제어
+- 충돌 감지 로직 (공과 패들, 공과 벽돌)
+- 난이도 설정에 따른 게임 룰 변경
+- 마우스 좌표 기반 패들 이동 구현
+-->
+
+
+<!DOCTYPE html> <!-- HTML5 문서 선언. HTML5를 사용하고 있음을 명시 -->
+<html lang="ko"> <!-- 페이지 언어를 한국어로 설정 -->
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>우주 미화원 게임</title>
+  <meta charset="UTF-8" /> <!-- UTF-8 문자 인코딩 설정. 한글이 깨지지 않게 함 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" /> <!-- 반응형 디자인을 위해 장치의 너비에 맞게 설정 -->
+  <title>SPACE CLEANER</title> <!-- 브라우저 탭에 표시될 문서 제목 -->
+
+  <!-- 스타일 시트: 게임 화면 요소의 기본 레이아웃과 스타일 설정 -->
   <style>
-    canvas { background: black; display: block; margin: 0 auto; }
-    #startBtn, #difficultySelect { display: block; margin: 10px auto; padding: 10px 20px; font-size: 18px; }
+    canvas {
+      background: black; /* 캔버스 배경은 우주 느낌을 위해 검정색 */
+      display: block; /* 블록 요소로 설정하여 margin 적용 가능하게 */
+      margin: 0 auto; /* 좌우 자동 마진으로 중앙 정렬 */
+    }
+
+    /* 버튼 및 선택창 스타일 */
+    #startBtn, #difficultySelect {
+      display: block; /* 위아래로 배치되도록 설정 */
+      margin: 10px auto; /* 위아래 10px, 좌우는 가운데 정렬 */
+      padding: 10px 20px; /* 안쪽 여백: 위아래 10px, 좌우 20px */
+      font-size: 18px; /* 텍스트 크기 */
+    }
+
+    /* 점수, 시간, 목표 표시하는 박스 스타일 */
     #scoreBoard, #timerBoard, #goalBoard {
-      text-align: center;
-      color: black;
-      font-family: monospace;
-      background: white;
-      padding: 5px;
-      border-radius: 5px;
-      width: max-content;
-      margin: 5px auto;
+      text-align: center; /* 텍스트 가운데 정렬 */
+      color: black; /* 글자색 */
+      font-family: monospace; /* 고정폭 글꼴로 가독성 확보 */
+      background: white; /* 배경 흰색 */
+      padding: 5px; /* 안쪽 여백 */
+      border-radius: 5px; /* 모서리 둥글게 */
+      width: max-content; /* 텍스트 길이에 맞는 너비 */
+      margin: 5px auto; /* 위아래 간격, 좌우 중앙 정렬 */
     }
   </style>
 </head>
+
 <body>
+  <!-- 난이도 선택창: 게임 규칙 변경을 위한 입력 요소 -->
   <select id="difficultySelect">
     <option value="1">난이도 1 (하단 제외 반사)</option>
     <option value="2">난이도 2 (상하 제외 반사)</option>
     <option value="3">난이도 3 (사방 게임오버)</option>
   </select>
+
+  <!-- 게임 시작 버튼 -->
   <button id="startBtn">게임 시작</button>
+
+  <!-- 점수/목표/시간을 표시하는 상태창 -->
   <div id="scoreBoard">점수: 0</div>
   <div id="goalBoard">목표: 100</div>
   <div id="timerBoard">남은 시간: 60s</div>
+
+  <!-- 게임이 실행되는 캔버스. width/height는 해상도 -->
   <canvas id="gameCanvas" width="800" height="600"></canvas>
 
 <script>
+/* DOM 요소들을 JS에서 사용할 수 있도록 변수에 저장 */
 const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
+const ctx = canvas.getContext("2d"); // 2D 그래픽 그리기 위한 컨텍스트
 const startBtn = document.getElementById("startBtn");
 const difficultySelect = document.getElementById("difficultySelect");
 const scoreBoard = document.getElementById("scoreBoard");
 const timerBoard = document.getElementById("timerBoard");
 const goalBoard = document.getElementById("goalBoard");
 
+/* 게임 관련 변수 정의 */
 let ball, paddles, bricks, score, isGameRunning, greenHitCount;
 let timer, timeLeft = 60, goal = 100;
 let difficulty = 1;
 let bonusMode = false;
 
+/* 벽돌 크기 및 패들 위치 계산 시 사용하는 여백값 */
 const brickWidth = 75;
 const brickHeight = 20;
 const padding = 20;
 
+/* 게임 초기화: 시작할 때마다 상태를 초기화함 */
 function initGame() {
   score = 0;
   greenHitCount = 0;
@@ -56,14 +101,16 @@ function initGame() {
   bonusMode = false;
   timeLeft = 60;
 
+  // 공의 초기 위치 및 속도 설정
   ball = {
     x: canvas.width / 2,
     y: canvas.height / 2,
-    dx: 4,
-    dy: -4,
-    radius: 10,
+    dx: 4, // 오른쪽으로 이동
+    dy: -4, // 위쪽으로 이동
+    radius: 10
   };
 
+  // 4방향 패들 정의 (각 방향마다 위치와 크기 설정)
   paddles = {
     top: { x: (canvas.width - 100) / 2, y: padding, width: 100, height: 10 },
     bottom: { x: (canvas.width - 100) / 2, y: canvas.height - padding - 10, width: 100, height: 10 },
@@ -71,23 +118,26 @@ function initGame() {
     right: { x: canvas.width - padding - 10, y: (canvas.height - 100) / 2, width: 10, height: 100 }
   };
 
+  // 벽돌 배열 초기화: 랜덤 위치에 생성
   bricks = [];
   for (let i = 0; i < 10; i++) {
-    const isBad = Math.random() < 0.2;
+    const isBad = Math.random() < 0.2; // 20% 확률로 나쁜 벽돌 생성
     bricks.push({
       x: Math.random() * (canvas.width - brickWidth),
       y: Math.random() * (canvas.height - brickHeight),
       dx: (Math.random() - 0.5) * 2,
       dy: (Math.random() - 0.5) * 2,
-      status: 1,
+      status: 1, // 살아있는 벽돌
       bad: isBad
     });
   }
 
+  // UI 초기화
   updateScore();
   updateTimer();
   updateGoal();
 
+  // 게임 타이머 설정 (1초 간격)
   if (timer) clearInterval(timer);
   timer = setInterval(() => {
     if (!isGameRunning) return;
@@ -105,197 +155,6 @@ function initGame() {
     }
   }, 1000);
 }
-
-function updateScore() {
-  scoreBoard.innerText = `점수: ${score}`;
-}
-function updateTimer() {
-  timerBoard.innerText = `남은 시간: ${timeLeft}s`;
-}
-function updateGoal() {
-  goalBoard.innerText = `목표: ${goal}`;
-}
-
-function drawBall() {
-  ctx.beginPath();
-  ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-  ctx.fillStyle = "white";
-  ctx.fill();
-  ctx.closePath();
-}
-function drawPaddles() {
-  for (const key in paddles) {
-    const p = paddles[key];
-    ctx.beginPath();
-    ctx.rect(p.x, p.y, p.width, p.height);
-    ctx.fillStyle = "white";
-    ctx.fill();
-    ctx.closePath();
-  }
-}
-function drawBricks() {
-  for (const b of bricks) {
-    if (b.status === 1) {
-      ctx.beginPath();
-      ctx.rect(b.x, b.y, brickWidth, brickHeight);
-      ctx.fillStyle = b.bad ? "darkred" : "lime";
-      if (b.bad) {
-        ctx.lineWidth = 3;
-        ctx.strokeStyle = "red";
-        ctx.stroke();
-      }
-      ctx.fill();
-      ctx.closePath();
-    }
-  }
-}
-function moveBricks() {
-  for (const b of bricks) {
-    if (b.status === 1) {
-      b.x += b.dx;
-      b.y += b.dy;
-      if (b.x < 0 || b.x + brickWidth > canvas.width) b.dx *= -1;
-      if (b.y < 0 || b.y + brickHeight > canvas.height) b.dy *= -1;
-    }
-  }
-}
-function scatterDebris(x, y) {
-  for (let i = 0; i < greenHitCount; i++) {
-    ctx.beginPath();
-    ctx.arc(x + Math.random() * 40 - 20, y + Math.random() * 40 - 20, 5, 0, Math.PI * 2);
-    ctx.fillStyle = "red";
-    ctx.fill();
-    ctx.closePath();
-  }
-}
-function spawnBricks(base) {
-  const count = Math.floor(Math.random() * 4) + 3;
-  for (let i = 0; i < count; i++) {
-    bricks.push({
-      x: base.x + Math.random() * 60 - 30,
-      y: base.y + Math.random() * 60 - 30,
-      dx: (Math.random() - 0.5) * 3,
-      dy: (Math.random() - 0.5) * 3,
-      status: 1,
-      bad: false
-    });
-  }
-}
-function collisionDetection() {
-  for (const b of bricks) {
-    if (
-      b.status === 1 &&
-      ball.x > b.x &&
-      ball.x < b.x + brickWidth &&
-      ball.y > b.y &&
-      ball.y < b.y + brickHeight
-    ) {
-      b.status = 0;
-      ball.dy = -ball.dy;
-      if (b.bad) {
-        score -= 10;
-        greenHitCount++;
-        scatterDebris(b.x + brickWidth / 2, b.y + brickHeight / 2);
-        spawnBricks(b);
-      } else {
-        score += 10;
-      }
-      updateScore();
-    }
-  }
-}
-
-function checkPaddleCollision() {
-  const { top, bottom, left, right } = paddles;
-
-  if (ball.y - ball.radius <= top.y + top.height &&
-      ball.y - ball.radius >= top.y &&
-      ball.x >= top.x && ball.x <= top.x + top.width) {
-    ball.dy = Math.abs(ball.dy);
-    return true;
-  }
-
-  if (ball.y + ball.radius >= bottom.y &&
-      ball.y + ball.radius <= bottom.y + bottom.height &&
-      ball.x >= bottom.x && ball.x <= bottom.x + bottom.width) {
-    ball.dy = -Math.abs(ball.dy);
-    return true;
-  }
-
-  if (ball.x - ball.radius <= left.x + left.width &&
-      ball.x - ball.radius >= left.x &&
-      ball.y >= left.y && ball.y <= left.y + left.height) {
-    ball.dx = Math.abs(ball.dx);
-    return true;
-  }
-
-  if (ball.x + ball.radius >= right.x &&
-      ball.x + ball.radius <= right.x + right.width &&
-      ball.y >= right.y && ball.y <= right.y + right.height) {
-    ball.dx = -Math.abs(ball.dx);
-    return true;
-  }
-
-  return false;
-}
-
-function draw() {
-  if (!isGameRunning) return;
-
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  drawBricks();
-  moveBricks();
-  drawBall();
-  drawPaddles();
-  collisionDetection();
-
-  const reflected = checkPaddleCollision();
-
-  if (!reflected && !bonusMode) {
-    if (ball.x - ball.radius <= 0) {
-      if (difficulty <= 2) ball.dx = Math.abs(ball.dx);
-      else return endGame("왼쪽 벽");
-    }
-    if (ball.x + ball.radius >= canvas.width) {
-      if (difficulty <= 2) ball.dx = -Math.abs(ball.dx);
-      else return endGame("오른쪽 벽");
-    }
-    if (ball.y - ball.radius <= 0) {
-      if (difficulty <= 1) ball.dy = Math.abs(ball.dy);
-      else return endGame("위쪽 벽");
-    }
-    if (ball.y + ball.radius >= canvas.height) {
-      if (difficulty <= 0) ball.dy = -Math.abs(ball.dy);
-      else return endGame("아래쪽 벽");
-    }
-  }
-
-  ball.x += ball.dx;
-  ball.y += ball.dy;
-
-  requestAnimationFrame(draw);
-}
-
-function endGame(where) {
-  isGameRunning = false;
-  alert(`${where}에 닿았습니다. 게임 오버`);
-}
-
-startBtn.addEventListener("click", () => {
-  difficulty = parseInt(difficultySelect.value);
-  initGame();
-  document.addEventListener("mousemove", e => {
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    paddles.top.x = Math.min(Math.max(padding, x - paddles.top.width / 2), canvas.width - paddles.top.width - padding);
-    paddles.bottom.x = Math.min(Math.max(padding, x - paddles.bottom.width / 2), canvas.width - paddles.bottom.width - padding);
-    paddles.left.y = Math.min(Math.max(padding, y - paddles.left.height / 2), canvas.height - paddles.left.height - padding);
-    paddles.right.y = Math.min(Math.max(padding, y - paddles.right.height / 2), canvas.height - paddles.right.height - padding);
-  });
-  draw();
-});
 </script>
 </body>
 </html>
