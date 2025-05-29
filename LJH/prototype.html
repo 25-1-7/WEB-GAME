@@ -1,0 +1,160 @@
+<!-- 
+파일명: space_cleaner.html
+작성자: 이지환 (Jihwan Lee)
+작성일: 2025년 5월 28일
+설명: 본 파일은 JavaScript 기반 캔버스 게임 'SPACE CLEANER'의 전체 코드로,
+사용자가 마우스로 조종하는 네 방향 패들로 우주 쓰레기를 반사시키며 처리하는 벽돌깨기 스타일의 게임의 프로토타입입니다.
+아래엔 원활한 팀원간의 이해를 위한 주석과 활용 가이드가 포함되어 있습니다.
+
+주요 개념:
+- HTML5 Canvas API로 게임 화면 구성
+- JavaScript를 통한 애니메이션 루프(draw)
+- DOM 요소 조작을 통한 인터페이스 제어
+- 충돌 감지 로직 (공과 패들, 공과 벽돌)
+- 난이도 설정에 따른 게임 룰 변경
+- 마우스 좌표 기반 패들 이동 구현
+-->
+
+
+<!DOCTYPE html> <!-- HTML5 문서 선언. HTML5를 사용하고 있음을 명시 -->
+<html lang="ko"> <!-- 페이지 언어를 한국어로 설정 -->
+<head>
+  <meta charset="UTF-8" /> <!-- UTF-8 문자 인코딩 설정. 한글이 깨지지 않게 함 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" /> <!-- 반응형 디자인을 위해 장치의 너비에 맞게 설정 -->
+  <title>SPACE CLEANER</title> <!-- 브라우저 탭에 표시될 문서 제목 -->
+
+  <!-- 스타일 시트: 게임 화면 요소의 기본 레이아웃과 스타일 설정 -->
+  <style>
+    canvas {
+      background: black; /* 캔버스 배경은 우주 느낌을 위해 검정색 */
+      display: block; /* 블록 요소로 설정하여 margin 적용 가능하게 */
+      margin: 0 auto; /* 좌우 자동 마진으로 중앙 정렬 */
+    }
+
+    /* 버튼 및 선택창 스타일 */
+    #startBtn, #difficultySelect {
+      display: block; /* 위아래로 배치되도록 설정 */
+      margin: 10px auto; /* 위아래 10px, 좌우는 가운데 정렬 */
+      padding: 10px 20px; /* 안쪽 여백: 위아래 10px, 좌우 20px */
+      font-size: 18px; /* 텍스트 크기 */
+    }
+
+    /* 점수, 시간, 목표 표시하는 박스 스타일 */
+    #scoreBoard, #timerBoard, #goalBoard {
+      text-align: center; /* 텍스트 가운데 정렬 */
+      color: black; /* 글자색 */
+      font-family: monospace; /* 고정폭 글꼴로 가독성 확보 */
+      background: white; /* 배경 흰색 */
+      padding: 5px; /* 안쪽 여백 */
+      border-radius: 5px; /* 모서리 둥글게 */
+      width: max-content; /* 텍스트 길이에 맞는 너비 */
+      margin: 5px auto; /* 위아래 간격, 좌우 중앙 정렬 */
+    }
+  </style>
+</head>
+
+<body>
+  <!-- 난이도 선택창: 게임 규칙 변경을 위한 입력 요소 -->
+  <select id="difficultySelect">
+    <option value="1">난이도 1 (하단 제외 반사)</option>
+    <option value="2">난이도 2 (상하 제외 반사)</option>
+    <option value="3">난이도 3 (사방 게임오버)</option>
+  </select>
+
+  <!-- 게임 시작 버튼 -->
+  <button id="startBtn">게임 시작</button>
+
+  <!-- 점수/목표/시간을 표시하는 상태창 -->
+  <div id="scoreBoard">점수: 0</div>
+  <div id="goalBoard">목표: 100</div>
+  <div id="timerBoard">남은 시간: 60s</div>
+
+  <!-- 게임이 실행되는 캔버스. width/height는 해상도 -->
+  <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+<script>
+/* DOM 요소들을 JS에서 사용할 수 있도록 변수에 저장 */
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d"); // 2D 그래픽 그리기 위한 컨텍스트
+const startBtn = document.getElementById("startBtn");
+const difficultySelect = document.getElementById("difficultySelect");
+const scoreBoard = document.getElementById("scoreBoard");
+const timerBoard = document.getElementById("timerBoard");
+const goalBoard = document.getElementById("goalBoard");
+
+/* 게임 관련 변수 정의 */
+let ball, paddles, bricks, score, isGameRunning, greenHitCount;
+let timer, timeLeft = 60, goal = 100;
+let difficulty = 1;
+let bonusMode = false;
+
+/* 벽돌 크기 및 패들 위치 계산 시 사용하는 여백값 */
+const brickWidth = 75;
+const brickHeight = 20;
+const padding = 20;
+
+/* 게임 초기화: 시작할 때마다 상태를 초기화함 */
+function initGame() {
+  score = 0;
+  greenHitCount = 0;
+  isGameRunning = true;
+  bonusMode = false;
+  timeLeft = 60;
+
+  // 공의 초기 위치 및 속도 설정
+  ball = {
+    x: canvas.width / 2,
+    y: canvas.height / 2,
+    dx: 4, // 오른쪽으로 이동
+    dy: -4, // 위쪽으로 이동
+    radius: 10
+  };
+
+  // 4방향 패들 정의 (각 방향마다 위치와 크기 설정)
+  paddles = {
+    top: { x: (canvas.width - 100) / 2, y: padding, width: 100, height: 10 },
+    bottom: { x: (canvas.width - 100) / 2, y: canvas.height - padding - 10, width: 100, height: 10 },
+    left: { x: padding, y: (canvas.height - 100) / 2, width: 10, height: 100 },
+    right: { x: canvas.width - padding - 10, y: (canvas.height - 100) / 2, width: 10, height: 100 }
+  };
+
+  // 벽돌 배열 초기화: 랜덤 위치에 생성
+  bricks = [];
+  for (let i = 0; i < 10; i++) {
+    const isBad = Math.random() < 0.2; // 20% 확률로 나쁜 벽돌 생성
+    bricks.push({
+      x: Math.random() * (canvas.width - brickWidth),
+      y: Math.random() * (canvas.height - brickHeight),
+      dx: (Math.random() - 0.5) * 2,
+      dy: (Math.random() - 0.5) * 2,
+      status: 1, // 살아있는 벽돌
+      bad: isBad
+    });
+  }
+
+  // UI 초기화
+  updateScore();
+  updateTimer();
+  updateGoal();
+
+  // 게임 타이머 설정 (1초 간격)
+  if (timer) clearInterval(timer);
+  timer = setInterval(() => {
+    if (!isGameRunning) return;
+    timeLeft--;
+    updateTimer();
+    if (timeLeft <= 0) {
+      clearInterval(timer);
+      if (score >= goal) {
+        bonusMode = true;
+        alert("목표 달성! 보너스 모드 시작!");
+      } else {
+        isGameRunning = false;
+        alert("목표 점수 미달로 게임 종료");
+      }
+    }
+  }, 1000);
+}
+</script>
+</body>
+</html>
