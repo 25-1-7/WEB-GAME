@@ -1,3 +1,5 @@
+html복사후 본인폴더에서 자유롭게 사용하시면 됩니다
+
 파일명: space_cleaner.html
 작성자: 이지환 (Jihwan Lee)
 작성일: 2025년 5월 28일
