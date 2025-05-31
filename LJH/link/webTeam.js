@@ -69,7 +69,14 @@ $(document).on("click", ".next-link", function () {
     $(".scenario-img-wrapper").replaceWith($newWrapper);
   } else {
     endScenario();
-    function startCanvasGameUI() {
+  
+  
+  function startCanvasGameUI() {
+  // 🎯 타이틀 배경 완전히 제거
+  $(".background").remove(); // 배경 제거
+  $("body").css("background", "black"); // 혹시라도 남은 배경 제거
+
+  // 🎯 게임 UI 삽입
   $(".content").html(`
     <div class="game-ui">
       <select id="difficultySelect">
@@ -81,11 +88,16 @@ $(document).on("click", ".next-link", function () {
       <div id="scoreBoard">점수: 0</div>
       <div id="goalBoard">목표: 100</div>
       <div id="timerBoard">남은 시간: 60s</div>
-      <canvas id="gameCanvas" width="800" height="600"></canvas>
+      <canvas id="gameCanvas" width="800" height="600" style="background:black;"></canvas>
     </div>
   `);
-  initCanvasGame(); // 이 함수는 네가 별도로 구현해둔 게임 로직
-    startCanvasGameUI(); // 이거 추가!
+
+  // 게임 시작 버튼 클릭 시 게임 로직 실행
+  $("#startBtn").on("click", function () {
+    $("#startBtn").hide();
+    $("#difficultySelect").hide();
+    runPaddleBrickGame($("#difficultySelect").val());
+  });
 }
 
 
@@ -111,12 +123,11 @@ function startCanvasGameUI() {
     </div>
   `);
 
-  // 버튼 클릭 시 게임 로직 시작
-  $("#startBtn").on("click", function () {
-    $("#startBtn").hide();
-    $("#difficultySelect").hide();
-    initCanvasGame($("#difficultySelect").val());
-  });
+$("#startBtn").on("click", function () {
+  $("#startBtn").hide();
+  $("#difficultySelect").hide();
+  runPaddleBrickGame($("#difficultySelect").val()); // ✅ 실제 게임 함수 호출!
+});
 }
 
 
@@ -314,4 +325,266 @@ function showMainMenu() {
   $(".title, .menu").removeClass("hidden");
   currentLine = 0;
   endingLine = 0;
+}
+
+
+/**인 게임 코드 */
+function runPaddleBrickGame(difficultyValue) {
+  const canvas = document.getElementById("gameCanvas");
+  const ctx = canvas.getContext("2d");
+
+  const difficulty = parseInt(difficultyValue || "1");
+  const padding = 20;
+  const brickWidth = 75;
+  const brickHeight = 20;
+  const goal = 100;
+
+  let score = 0;
+  let timeLeft = 60;
+  let isGameRunning = true;
+  let bonusMode = false;
+  let greenHitCount = 0;
+  let timer;
+
+  const ball = {
+    x: canvas.width / 2,
+    y: canvas.height / 2,
+    dx: 4,
+    dy: -4,
+    radius: 10,
+  };
+
+  const paddles = {
+    top: { x: (canvas.width - 100) / 2, y: padding, width: 100, height: 10 },
+    bottom: { x: (canvas.width - 100) / 2, y: canvas.height - padding - 10, width: 100, height: 10 },
+    left: { x: padding, y: (canvas.height - 100) / 2, width: 10, height: 100 },
+    right: { x: canvas.width - padding - 10, y: (canvas.height - 100) / 2, width: 10, height: 100 }
+  };
+
+  let bricks = [];
+  for (let i = 0; i < 10; i++) {
+    const isBad = Math.random() < 0.2;
+    bricks.push({
+      x: Math.random() * (canvas.width - brickWidth),
+      y: Math.random() * (canvas.height - brickHeight),
+      dx: (Math.random() - 0.5) * 2,
+      dy: (Math.random() - 0.5) * 2,
+      status: 1,
+      bad: isBad
+    });
+  }
+
+  function updateScore() {
+    $("#scoreBoard").text(`점수: ${score}`);
+  }
+
+  function updateTimer() {
+    $("#timerBoard").text(`남은 시간: ${timeLeft}s`);
+  }
+
+  function updateGoal() {
+    $("#goalBoard").text(`목표: ${goal}`);
+  }
+
+  function drawBall() {
+    ctx.beginPath();
+    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+    ctx.fillStyle = "white";
+    ctx.fill();
+    ctx.closePath();
+  }
+
+  function drawPaddles() {
+    ctx.fillStyle = "white";
+    for (const key in paddles) {
+      const p = paddles[key];
+      ctx.fillRect(p.x, p.y, p.width, p.height);
+    }
+  }
+
+  function drawBricks() {
+    bricks.forEach(b => {
+      if (b.status === 1) {
+        ctx.beginPath();
+        ctx.rect(b.x, b.y, brickWidth, brickHeight);
+        ctx.fillStyle = b.bad ? "darkred" : "lime";
+        if (b.bad) {
+          ctx.lineWidth = 3;
+          ctx.strokeStyle = "red";
+          ctx.stroke();
+        }
+        ctx.fill();
+        ctx.closePath();
+      }
+    });
+  }
+
+  function moveBricks() {
+    bricks.forEach(b => {
+      if (b.status === 1) {
+        b.x += b.dx;
+        b.y += b.dy;
+        if (b.x < 0 || b.x + brickWidth > canvas.width) b.dx *= -1;
+        if (b.y < 0 || b.y + brickHeight > canvas.height) b.dy *= -1;
+      }
+    });
+  }
+
+  function scatterDebris(x, y) {
+    for (let i = 0; i < greenHitCount; i++) {
+      ctx.beginPath();
+      ctx.arc(x + Math.random() * 40 - 20, y + Math.random() * 40 - 20, 5, 0, Math.PI * 2);
+      ctx.fillStyle = "red";
+      ctx.fill();
+      ctx.closePath();
+    }
+  }
+
+  function spawnBricks(base) {
+    const count = Math.floor(Math.random() * 4) + 3;
+    for (let i = 0; i < count; i++) {
+      bricks.push({
+        x: base.x + Math.random() * 60 - 30,
+        y: base.y + Math.random() * 60 - 30,
+        dx: (Math.random() - 0.5) * 3,
+        dy: (Math.random() - 0.5) * 3,
+        status: 1,
+        bad: false
+      });
+    }
+  }
+
+  function collisionDetection() {
+    bricks.forEach(b => {
+      if (
+        b.status === 1 &&
+        ball.x > b.x &&
+        ball.x < b.x + brickWidth &&
+        ball.y > b.y &&
+        ball.y < b.y + brickHeight
+      ) {
+        b.status = 0;
+        ball.dy = -ball.dy;
+        if (b.bad) {
+          score -= 10;
+          greenHitCount++;
+          scatterDebris(b.x + brickWidth / 2, b.y + brickHeight / 2);
+          spawnBricks(b);
+        } else {
+          score += 10;
+        }
+        updateScore();
+      }
+    });
+  }
+
+  function checkPaddleCollision() {
+    const { top, bottom, left, right } = paddles;
+
+    if (ball.y - ball.radius <= top.y + top.height &&
+        ball.y - ball.radius >= top.y &&
+        ball.x >= top.x && ball.x <= top.x + top.width) {
+      ball.dy = Math.abs(ball.dy);
+      return true;
+    }
+
+    if (ball.y + ball.radius >= bottom.y &&
+        ball.y + ball.radius <= bottom.y + bottom.height &&
+        ball.x >= bottom.x && ball.x <= bottom.x + bottom.width) {
+      ball.dy = -Math.abs(ball.dy);
+      return true;
+    }
+
+    if (ball.x - ball.radius <= left.x + left.width &&
+        ball.x - ball.radius >= left.x &&
+        ball.y >= left.y && ball.y <= left.y + left.height) {
+      ball.dx = Math.abs(ball.dx);
+      return true;
+    }
+
+    if (ball.x + ball.radius >= right.x &&
+        ball.x + ball.radius <= right.x + right.width &&
+        ball.y >= right.y && ball.y <= right.y + right.height) {
+      ball.dx = -Math.abs(ball.dx);
+      return true;
+    }
+
+    return false;
+  }
+
+  function endGame(where) {
+    isGameRunning = false;
+    clearInterval(timer);
+    alert(`${where}에 닿았습니다. 게임 오버`);
+  }
+
+  function draw() {
+    if (!isGameRunning) return;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawBricks();
+    moveBricks();
+    drawBall();
+    drawPaddles();
+    collisionDetection();
+
+    const reflected = checkPaddleCollision();
+
+    if (!reflected && !bonusMode) {
+      if (ball.x - ball.radius <= 0) {
+        if (difficulty <= 2) ball.dx = Math.abs(ball.dx);
+        else return endGame("왼쪽 벽");
+      }
+      if (ball.x + ball.radius >= canvas.width) {
+        if (difficulty <= 2) ball.dx = -Math.abs(ball.dx);
+        else return endGame("오른쪽 벽");
+      }
+      if (ball.y - ball.radius <= 0) {
+        if (difficulty <= 1) ball.dy = Math.abs(ball.dy);
+        else return endGame("위쪽 벽");
+      }
+      if (ball.y + ball.radius >= canvas.height) {
+        if (difficulty <= 0) ball.dy = -Math.abs(ball.dy);
+        else return endGame("아래쪽 벽");
+      }
+    }
+
+    ball.x += ball.dx;
+    ball.y += ball.dy;
+
+    requestAnimationFrame(draw);
+  }
+
+  // 마우스 따라 패들 이동
+  document.addEventListener("mousemove", e => {
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    paddles.top.x = Math.min(Math.max(padding, x - paddles.top.width / 2), canvas.width - paddles.top.width - padding);
+    paddles.bottom.x = Math.min(Math.max(padding, x - paddles.bottom.width / 2), canvas.width - paddles.bottom.width - padding);
+    paddles.left.y = Math.min(Math.max(padding, y - paddles.left.height / 2), canvas.height - paddles.left.height - padding);
+    paddles.right.y = Math.min(Math.max(padding, y - paddles.right.height / 2), canvas.height - paddles.right.height - padding);
+  });
+
+  updateScore();
+  updateTimer();
+  updateGoal();
+
+  draw();
+
+  timer = setInterval(() => {
+    if (!isGameRunning) return;
+    timeLeft--;
+    updateTimer();
+    if (timeLeft <= 0) {
+      clearInterval(timer);
+      if (score >= goal) {
+        bonusMode = true;
+        alert("목표 달성! 보너스 모드 시작!");
+      } else {
+        endGame("시간 초과");
+      }
+    }
+  }, 1000);
 }

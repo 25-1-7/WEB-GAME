@@ -33,6 +33,7 @@
 
 body {
     margin: 100px auto;
+    background: black; /* 기본 검정 */
 }
 
 @font-face {
