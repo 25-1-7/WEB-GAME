@@ -212,9 +212,13 @@ $(document).on("click", ".skip-link", function () {
 function endScenario() {
   $(".scenario").remove();
   $(".background").css("filter", "brightness(1)");
-  $(".title, .menu").removeClass("hidden");
+  $(".title, .menu").addClass("hidden"); // 메뉴는 숨기고
   currentLine = 0;
+
+  // 게임 UI 시작
+  startCanvasGameUI();
 }
+
 
 const starPositions = [
   { top: "50px", left: "120px" },
