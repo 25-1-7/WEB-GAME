@@ -1,3 +1,20 @@
+
+// 전역에 추가
+const bgmTitle = new Audio("BGM/title.mp3");
+const bgmGame = new Audio("BGM/Occam.mp3");
+
+// 무한 반복
+bgmTitle.loop = true;
+bgmGame.loop = true;
+$(document).ready(function () {
+  bgmTitle.play(); // 타이틀 음악 재생
+});
+
+
+
+
+
+
 const scenarioImages = [
   ["scImg01.png"],
   ["scImg02.png", "scImg03.png"],
@@ -47,8 +64,14 @@ function renderScenarioImage(imageList) {
 
   return $wrapper;
 }
-
+let titleBgmStarted = false;
 $("#start").on("click", function () {
+   // 🎵 타이틀 BGM은 한 번만 재생되도록 (사용자 상호작용 이후)
+  if (!titleBgmStarted) {
+    bgmTitle.play().catch(e => console.warn("타이틀 BGM 재생 실패:", e));
+    titleBgmStarted = true;
+  }
+
   $(".title, .menu").addClass("hidden");
   $(".background").css("filter", "brightness(0.3)");
 
@@ -73,6 +96,9 @@ $(document).on("click", ".next-link", function () {
     const $newWrapper = renderScenarioImage(scenarioImages[currentLine]);
     $(".scenario-img-wrapper").replaceWith($newWrapper);
   } else {
+    bgmTitle.pause();
+    bgmTitle.currentTime = 0;
+    bgmGame.play().catch(e => console.warn("Game BGM blocked:", e));
     endScenario();
 
 
@@ -203,6 +229,9 @@ function initCanvasGame(difficulty) {
 
 
 $(document).on("click", ".skip-link", function () {
+  bgmTitle.pause();
+    bgmTitle.currentTime = 0;
+    bgmGame.play().catch(e => console.warn("Game BGM blocked:", e));
   endScenario();
 });
 
@@ -211,6 +240,10 @@ function endScenario() {
   $(".background").css("filter", "brightness(1)");
   $(".title, .menu").addClass("hidden"); // 메뉴는 숨기고
   currentLine = 0;
+  bgmTitle.pause();
+  bgmTitle.currentTime = 0;
+
+ bgmGame.play().catch(e => console.log("Game BGM Blocked:", e));
 
   // 게임 UI 시작
   startCanvasGameUI();
