@@ -465,7 +465,7 @@ body {
   }
 
   #gameExplainBox {
-    background-color: rgba(255, 255, 255, 0.6); /* 불투명도만 조정 */
+    background-color: rgba(255, 255, 255, 0.3); /* 불투명도만 조정 */
     border-radius: 20px;
     padding: 15px 20px;
   }  
