@@ -1,0 +1,489 @@
+
+/* -------------------------------------------------------
+   game-wrapper가 빨간색으로 잠깐 빛날 때 적용할 클래스
+   box-shadow 속성으로 “외곽이 불꽃처럼 빛나는” 효과를 줍니다.
+------------------------------------------------------- */
+#game-wrapper.glow-red {
+  box-shadow: 0 0 20px 5px rgba(255, 0, 0, 0.9);
+  /* 붉은빛이 바깥으로 퍼지는 효과 */
+  transition: box-shadow 0.1s ease-out;
+}
+
+/* -------------------------------------------------------
+   game-wrapper가 노란색으로 잠깐 빛날 때 적용할 클래스
+------------------------------------------------------- */
+#game-wrapper.glow-yellow {
+  box-shadow: 0 0 20px 5px rgba(255, 255, 0, 0.9);
+  /* 노란빛이 바깥으로 퍼지는 효과 */
+  transition: box-shadow 0.1s ease-out;
+}
+
+#game-wrapper.glow-blue {
+  /* 파란색 빛이 바깥으로 퍼지도록 box-shadow 설정 */
+  box-shadow: 0 0 20px 5px rgba(0, 162, 255, 0.9);
+  transition: box-shadow 0.1s ease-out;
+}
+
+/* 흔들림 애니메이션 정의 */
+@keyframes canvas-shake {
+  0%   { transform: translate(0, 0); }
+  20%  { transform: translate(-2px, 0); }
+  40%  { transform: translate(2px, 0); }
+  60%  { transform: translate(-2px, 0); }
+  80%  { transform: translate(2px, 0); }
+  100% { transform: translate(0, 0); }
+}
+
+
+
+/* 흔들림 클래스 */
+.shake {
+  animation: canvas-shake 0.3s ease-in-out;
+}
+
+/*강한 흔들*/
+@keyframes canvas-shake-strong {
+  0%   { transform: translate(0, 0) }
+  15%  { transform: translate(-5px, 0) }
+  30%  { transform: translate(5px, 0) }
+  45%  { transform: translate(-5px, 0) }
+  60%  { transform: translate(5px, 0) }
+  75%  { transform: translate(-5px, 0) }
+  90%  { transform: translate(5px, 0) }
+  100% { transform: translate(0, 0) }
+}
+
+.shake-strong {
+  animation: canvas-shake-strong 0.4s ease-in-out
+}
+
+
+
+
+
+
+.title {
+    text-align: center;
+    font-size: 90px;
+    line-height: 350px;
+    font-family: 'DungGeunMo';
+    color: rgb(253, 219, 48);
+    font-weight: bold;
+    animation: blink 1.5s infinite;
+    text-shadow:
+        -2px -2px 0 white,
+        2px -2px 0 #000,
+        -2px 2px 0 #000,
+        2px 2px 0 #000;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+.wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    width: 800px;
+    height: 500px;
+    background-image: url("bgImg.png");
+    background-size: cover;
+    background-position: center;
+    margin: 150px auto;
+}
+
+body {
+    margin: 100px auto;
+    background: black; /* 기본 검정 */
+}
+
+@font-face {
+    font-family: 'DungGeunMo';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/DungGeunMo.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+.menu {
+    padding: 50px 0;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 120px;
+    margin-top: 0px;
+    text-shadow:
+        -2px -2px 0 white,
+        2px -2px 0 #000,
+        -2px 2px 0 #000,
+        2px 2px 0 #000;
+}
+
+
+.menu-item {
+    font-family: 'DungGeunMo';
+    font-size: 36px;
+    color: rgb(253, 219, 48);
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+#difficultySelect{
+    padding: 50px 0;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 50px;
+    text-shadow:
+        -2px -2px 0 black,
+        2px -2px 0 #000,
+        -2px 2px 0 #000,
+        2px 2px 0 #000;
+}
+
+.diff-menu{
+     font-family: 'DungGeunMo';
+    font-size: 35px;
+    color: rgb(253, 219, 48);
+    opacity: 0.7;
+    cursor: pointer;
+    transition: 0.3s;
+    text-align: center;
+    text-shadow:
+        -2px -2px 0 white,
+        2px -2px 0 #000,
+        -2px 2px 0 #000,
+        2px 2px 0 #000;
+}
+
+#startBtn {
+  font-family: 'DungGeunMo';
+  font-size: 100px;
+  padding: 10px 30px;
+  text-align: center;
+  font-weight: bold;
+  color: rgb(253, 219, 48);
+  text-shadow:
+        -2px -2px 0 white,
+        2px -2px 0 #000,
+        -2px 2px 0 #000,
+        2px 2px 0 #000;
+  cursor: pointer;
+  
+}
+
+
+#startBtn:hover {
+    transform: scale(1.10);
+    text-shadow:
+    -2px -2px 0 white,
+    2px -2px 0 #000,
+    -2px 2px 0 #000,
+    2px 2px 0 #000;
+  }
+
+.diff-menu.selected {
+  opacity: 1;
+  color: rgb(255, 223, 64);
+  font-weight: bold;
+}
+
+.scenario {
+    width: 500px;
+    margin: 0 auto;
+    text-align: center;
+    color: white;
+    font-family: 'DungGeunMo';
+}
+
+.scenario-img {
+    width: 450px;
+    height: 250px;
+    object-fit: cover;
+    display: block;
+    margin: 0 auto;
+}
+
+.scenario-text {
+    margin-top: 20px;
+    font-size: 15px;
+    line-height: 1.4;
+}
+
+.hidden {
+    display: none;
+}
+
+.background {
+    position: relative;
+    width: 800px;
+    height: 500px;
+    position: absolute;
+    background-image: url("bgImg.png");
+    background-size: cover;
+    background-position: center;
+    z-index: 0;
+    filter: brightness(1);
+    transition: filter 1s ease-in-out;
+}
+
+.content {
+    z-index: 1;
+}
+
+.scenario-links {
+    margin-top: 10px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 30px;
+}
+
+.link-text {
+    font-family: 'DungGeunMo';
+    font-size: 20px;
+    color: white;
+    cursor: pointer;
+    user-select: none;
+    transition: opacity 0.2s;
+}
+
+.link-text:hover {
+    opacity: 0.7;
+}
+
+.star-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.star {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    animation: pulse 1.8s infinite ease-in-out;
+    transform-origin: center;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+}
+
+.credit-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center; /* 👉 수직 가운데 정렬 */
+  z-index: 9999;
+}
+
+
+.credit-popup {
+    background: white;
+    color: black;
+    padding: 30px;
+    border-radius: 10px;
+    width: 300px;
+    font-family: 'DungGeunMo';
+    text-align: center;
+    position: relative;
+    box-shadow: 0 0 15px #000;
+}
+
+.credit-close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 24px;
+    cursor: pointer;
+    color: black;
+}
+
+.scenario-img-wrapper {
+    position: relative;
+    width: 450px;
+    height: 250px;
+    margin: 0 auto;
+    display: flex;                /* ← Flex 컨테이너로 전환 */
+    justify-content: center;     /* ← 가로 가운데 정렬 */
+    align-items: center;         /* ← 세로 가운데 정렬 */
+  }
+  
+
+.base-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.overlay-img {
+    position: absolute;
+    top: 10%;
+    left: 15%;
+    width: 70%;
+    height: auto;
+    transform: translate(-50%, -50%);
+    object-fit: contain;
+    animation: float 2s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-8px);
+    }
+}
+
+@keyframes blink-brightness {
+    0%, 100% {
+        filter: brightness(1);
+    }
+    50% {
+        filter: brightness(0.4);
+    }
+}
+
+.blinking {
+    animation: blink-brightness 1.8s infinite;
+}
+
+
+.game-ui{
+    width: 800px;
+    margin: 0 auto;
+}
+
+#gameCanvas{
+    display: block;
+    background:black;
+}
+
+.top-bar {
+    display: flex;
+    justify-content: flex-start;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+
+}
+
+#difficultySelect {
+    font-family: 'DungGeunMo';
+    font-size: 14px;
+    height: 28px;
+}
+
+#game-info-bar{
+  display:flex; justify-content:space-between; /* 균등 간격 */
+  align-items:center;
+
+  border-top:2px solid #9e9e9e;   /* 위 선 */
+  border-bottom:2px solid #9e9e9e;/* 아래 선 */
+
+  height:38px;   /* 선+텍스트 포함 총 높이 */
+  padding:0 40px;/* 좌우 여백 – 선에서 글씨가 좀 떨어지도록 */
+  box-sizing:border-box;
+
+  background:none;           /* 배경 투명 */
+  font-family:'DungGeunMo';
+}
+
+#game-info-bar > div {
+  flex:1;                    /* 가변 폭 – 공간 똑같이 나눔 */
+  text-align:center;         /* 가운데 정렬 */
+  font-size:20px;
+  color:#9e9e9e;             /* 기본 회색 */
+  font-weight:bold;  
+}
+
+.left-light {
+  height: 20px;
+  margin-right: 10px;
+}
+
+.right-light {
+  height: 20px;
+  margin-left: 10px;
+}
+
+#game-wrapper{
+    width: 800px;
+    margin:0 auto; 
+    position:relative;
+    display:flex;              
+    flex-direction:column;  
+}
+
+.diffselect-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* 가로 중앙 정렬 */
+  gap: 40px;
+  margin-top: 100px;
+}
+
+.moon-fly {
+    position: absolute;
+    width: 50px;
+    bottom: 20%;
+    left: 60%;
+    opacity: 1;
+    transition: transform 2s ease-out;
+    z-index: 3;
+  }
+  
+  .moon-animate {
+    transform: translate(-200px, -120px) rotate(-140deg);
+    opacity: 1;
+  }
+  
+
+  .hidden {
+    display: none !important;
+  }
+
+  #gameExplainBox {
+    background-color: rgba(255, 255, 255, 0.6); /* 불투명도만 조정 */
+    border-radius: 20px;
+    padding: 15px 20px;
+  }  
+
+    #gameExplain {
+    font-size: 15px;
+    text-align: center;
+    color: white;
+    opacity: 1;
+}
+  
+
+  .explainImg {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+    width: 300px;
+    object-fit: contain;
+    margin: 0 auto;
+  }
+  
