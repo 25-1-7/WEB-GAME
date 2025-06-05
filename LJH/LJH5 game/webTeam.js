@@ -1,3 +1,34 @@
+
+//쓰레기 이미지
+const trashImages = [
+  "trash/1.png", "trash/2.png", "trash/3.png", "trash/4.png",
+  "trash/5.png", "trash/7.png", "trash/8.png"
+];
+const satelliteImages = [
+  "satellite/satelite.png", "satellite/debris1.png", "satellite/debris2.png",
+  "satellite/debris3.png", "satellite/debris4.png"
+];
+
+// satelliteImages 배열 순서 기준으로 파편을 매핑
+const satelliteMapping = {
+  "satellite/satelite.png": ["satellite/debris1.png"],
+  "satellite/debris1.png": ["satellite/debris2.png"],
+  "satellite/debris2.png": ["satellite/debris3.png"],
+  "satellite/debris3.png": ["satellite/debris4.png"],
+  "satellite/debris4.png": ["satellite/debris1.png", "satellite/debris2.png"]
+};
+
+
+
+// 전역에 추가
+const bgmTitle = new Audio("BGM/title.mp3");
+const bgmGame = new Audio("BGM/Occam.mp3");
+
+// 무한 반복
+bgmTitle.loop = true;
+bgmGame.loop = true;
+
+
 const scenarioImages = [
   ["scImg01.png"],
   ["scImg02.png", "scImg03.png"],
@@ -49,6 +80,10 @@ function renderScenarioImage(imageList) {
 }
 
 $(document).on("click", "#start", function () {
+    if (!titleBgmStarted) {
+    bgmTitle.play().catch(e => console.warn("타이틀 BGM 재생 실패:", e));
+    titleBgmStarted = true;
+  }
   $(".title, .menu").addClass("hidden");
   $(".background").css("filter", "brightness(0.3)");
 
@@ -191,7 +226,7 @@ $(document).on("click", ".diff-menu", function () {
   selectedDifficulty = $(this).data("value");
 });
 
-
+let titleBgmStarted = false;
 //startBtn 버튼 타입 사용 안 하고 리스너 생성 
 $(document).on("click", "#startBtn", function () {
   startCanvasGameUI();//게임 UI 시작
@@ -265,10 +300,11 @@ function initCanvasGame(difficulty) {
     });
   }
 
-  function updateUI() {
-    $("#scoreBoard").text(`goal: ${score}`);
-    $("#timerBoard").text(`time: ${timeLeft}s`);
-  }
+ function updateUI() {
+  $("#scoreBoard").text(`[score: ${score}]`);
+  $("#goalBoard").text(`[goal: ${goal}]`);
+  $("#lifeBoard").text("❤️".repeat(lives));
+}
 
   function gameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -310,6 +346,11 @@ function endScenario() {
   $(".background").css("filter", "brightness(1)");
   $(".title, .menu").addClass("hidden"); // 메뉴는 숨기고
   currentLine = 0;
+    // BGM 전환
+  bgmTitle.pause();
+  bgmTitle.currentTime = 0;
+  bgmGame.play().catch(e => console.log("Game BGM Blocked:", e));
+
   showStageExplanation();
 }
 
@@ -425,6 +466,15 @@ function showMainMenu () {
   // 3) 백그라운드 다시 보이기
   $(".background").show().css("filter","brightness(1)");
 
+
+  //3-1) BGM
+  
+  // BGM 전환
+  bgmGame.pause();
+  bgmGame.currentTime = 0;
+
+  bgmTitle.play().catch(e => console.warn("타이틀 BGM 재생 실패:", e));
+
   // 4) 상태 리셋
   currentLine = 0;
   endingLine  = 0;
@@ -473,18 +523,61 @@ function runPaddleBrickGame(difficultyValue) {
   };
 
   let bricks = [];
-  for (let i = 0; i < 10; i++) {
-    const isBad = Math.random() < 0.2;
-    bricks.push({
-      x: Math.random() * (canvas.width - brickWidth),
-      y: Math.random() * (canvas.height - brickHeight),
-      dx: (Math.random() - 0.5) * 2,
-      dy: (Math.random() - 0.5) * 2,
-      status: 1,
-      bad: isBad
-    });
+for (let i = 0; i < 10; i++) {
+  const isBad = Math.random() < 0.3;
+let src, img, type;
+
+let renderWidth = 60;
+let renderHeight = 60;
+let preserveAspect = false;
+
+if (isBad) {
+  src = satelliteImages[Math.floor(Math.random() * satelliteImages.length)];
+  type = "satellite";
+  renderWidth = 100;
+  renderHeight = 100;
+  preserveAspect = false; // satellite는 비율 고정 없이 정사각형
+} else {
+  src = trashImages[Math.floor(Math.random() * trashImages.length)];
+  type = "trash";
+  renderWidth = 60;
+  renderHeight = 60;
+  preserveAspect = true; // trash는 비율 유지
+}
+
+img = new Image();
+img.src = src;
+
+bricks.push({
+  x: Math.random() * (canvas.width - renderWidth),
+  y: Math.random() * (canvas.height - renderHeight),
+  dx: (Math.random() - 0.5) * 0.5,
+  dy: (Math.random() - 0.5) * 0.5,
+  status: 1,
+  type,
+  img,
+  src,
+  renderWidth,
+  renderHeight,
+  preserveAspect
+});
+
+}
+function loseLifeAndResetBall() {
+  lives--;
+  updateUI();
+
+  if (lives <= 0) {
+    endGame("하트 소진");
+    return;
   }
 
+  // 공 중앙으로 재배치
+  ball.x = canvas.width / 2;
+  ball.y = canvas.height / 2;
+  ball.dx = 4;
+  ball.dy = -4;
+}
   function updateScore() {
     $("#scoreBoard").text(`[score: ${score}]`);
   }
@@ -516,13 +609,14 @@ function runPaddleBrickGame(difficultyValue) {
   function drawBricks() {
   bricks.forEach(b => {
     if (b.status === 1) {
-      if (debrisImg.complete) {
-        // 잔해 이미지로 벽돌 그리기
-        ctx.drawImage(debrisImg, b.x, b.y, brickWidth, brickHeight);
-      } 
-      // 일단은 bad 벽돌이면 테두리 표시 빨간색으로!
+      if (b.img.complete) {
+        ctx.drawImage(b.img, b.x, b.y, brickWidth, brickHeight);
+      } else {
+        ctx.fillStyle = b.bad ? "red" : "gray"; // 로딩 안 됐을 때 대비
+        ctx.fillRect(b.x, b.y, brickWidth, brickHeight);
+      }
       if (b.bad) {
-        ctx.lineWidth = 3;
+        ctx.lineWidth = 2;
         ctx.strokeStyle = "red";
         ctx.strokeRect(b.x, b.y, brickWidth, brickHeight);
       }
@@ -565,29 +659,56 @@ function runPaddleBrickGame(difficultyValue) {
     }
   }
 
-  function collisionDetection() {
-    bricks.forEach(b => {
-      if (
-        b.status === 1 &&
-        ball.x > b.x &&
-        ball.x < b.x + brickWidth &&
-        ball.y > b.y &&
-        ball.y < b.y + brickHeight
-      ) {
-        b.status = 0;
-        ball.dy = -ball.dy;
-        if (b.bad) {
-          score -= 10;
-          greenHitCount++;
-          scatterDebris(b.x + brickWidth / 2, b.y + brickHeight / 2);
-          spawnBricks(b);
-        } else {
-          score += 10;
-        }
+function collisionDetection() {
+  bricks.forEach(b => {
+    if (
+      b.status === 1 &&
+      ball.x > b.x &&
+      ball.x < b.x + brickWidth &&
+      ball.y > b.y &&
+      ball.y < b.y + brickHeight
+    ) {
+      b.status = 0;
+      ball.dy = -ball.dy;
+      if (b.type === "satellite") {
+  const debrisList = [
+    "satellite/debris1.png",
+    "satellite/debris2.png",
+    "satellite/debris3.png",
+    "satellite/debris4.png"
+  ];
+  // 점수 차감
+  score = Math.max(0, score - 20); // 최소 0점 유지
+  updateScore(); // UI 갱신
+  setTimeout(() => {
+    debrisList.forEach(debrisSrc => {
+      const debrisImg = new Image();
+      debrisImg.src = debrisSrc;
+
+      bricks.push({
+        x: b.x + Math.random() * 30 - 15,
+        y: b.y + Math.random() * 30 - 15,
+        dx: (Math.random() - 0.5) * 2,
+        dy: (Math.random() - 0.5) * 2,
+        status: 1,
+        type: "debris",
+        img: debrisImg,
+        src: debrisSrc
+      });
+    });
+  }, 1000);
+}
+
+
+    else {
+        // trash or debris
+        score += 10;
         updateScore();
       }
-    });
-  }
+    }
+  });
+}
+
 
   function checkPaddleCollision() {
     const { top, bottom, left, right } = paddles;
@@ -644,22 +765,22 @@ function runPaddleBrickGame(difficultyValue) {
 
     const reflected = checkPaddleCollision();
 
-    if (!reflected && !bonusMode) {
+    if (!reflected) {
       if (ball.x - ball.radius <= 0) {
         if (difficulty <= 2) ball.dx = Math.abs(ball.dx);
-        else return endGame("왼쪽 벽");
+        else return loseLifeAndResetBall();
       }
       if (ball.x + ball.radius >= canvas.width) {
         if (difficulty <= 2) ball.dx = -Math.abs(ball.dx);
-        else return endGame("오른쪽 벽");
+        else return loseLifeAndResetBall();
       }
       if (ball.y - ball.radius <= 0) {
         if (difficulty <= 1) ball.dy = Math.abs(ball.dy);
-        else return endGame("위쪽 벽");
+        else return loseLifeAndResetBall();
       }
       if (ball.y + ball.radius >= canvas.height) {
         if (difficulty <= 0) ball.dy = -Math.abs(ball.dy);
-        else return endGame("아래쪽 벽");
+        else return loseLifeAndResetBall();
       }
     }
 
@@ -673,7 +794,47 @@ function runPaddleBrickGame(difficultyValue) {
 
     ball.x += ball.dx;
     ball.y += ball.dy;
+    // 모든 쓰레기/위성 제거되면 자동 재생성
+if (bricks.filter(b => b.status === 1).length === 0) {
+  for (let i = 0; i < 10; i++) {
+    const isBad = Math.random() < 0.3;
 
+    let src, img, type;
+    let renderWidth = 60;
+    let renderHeight = 60;
+    let preserveAspect = false;
+
+    if (isBad) {
+      src = satelliteImages[Math.floor(Math.random() * satelliteImages.length)];
+      type = "satellite";
+      renderWidth = 100;
+      renderHeight = 100;
+    } else {
+      src = trashImages[Math.floor(Math.random() * trashImages.length)];
+      type = "trash";
+      renderWidth = 60;
+      renderHeight = 60;
+      preserveAspect = true;
+    }
+
+    img = new Image();
+    img.src = src;
+
+    bricks.push({
+      x: Math.random() * (canvas.width - renderWidth),
+      y: Math.random() * (canvas.height - renderHeight),
+      dx: (Math.random() - 0.5) * 0.5,
+      dy: (Math.random() - 0.5) * 0.5,
+      status: 1,
+      type,
+      img,
+      src,
+      renderWidth,
+      renderHeight,
+      preserveAspect
+    });
+  }
+}
     requestAnimationFrame(draw);
   }
 
