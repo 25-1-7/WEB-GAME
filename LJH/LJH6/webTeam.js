@@ -729,6 +729,15 @@ function collisionDetection() {
     ) {
       b.status = 0;
       ball.dy = -ball.dy;
+
+      // 흔들림 효과 주기
+      const $wrapper = $("#game-wrapper");
+      $wrapper.addClass("shake");
+      setTimeout(() => {
+        $wrapper.removeClass("shake");
+      }, 300); // CSS 애니메이션 지속 시간과 동일하게 설정
+
+
       if (b.type === "satellite") {
   const debrisList = [
     "satellite/debris1.png",
@@ -785,7 +794,6 @@ function collisionDetection() {
         ball.y + ball.radius <= bottom.y + bottom.height &&
         ball.x >= bottom.x && ball.x <= bottom.x + bottom.width) {
       ball.dy = -Math.abs(ball.dy);
-      flashBorder("glow-blue");
       return true;
     }
 
@@ -793,7 +801,6 @@ function collisionDetection() {
         ball.x - ball.radius >= left.x &&
         ball.y >= left.y && ball.y <= left.y + left.height) {
       ball.dx = Math.abs(ball.dx);
-      flashBorder("glow-blue");
       return true;
     }
 
@@ -801,7 +808,6 @@ function collisionDetection() {
         ball.x + ball.radius <= right.x + right.width &&
         ball.y >= right.y && ball.y <= right.y + right.height) {
       ball.dx = -Math.abs(ball.dx);
-      flashBorder("glow-blue");
       return true;
     }
 
