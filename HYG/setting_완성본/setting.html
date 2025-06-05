@@ -1,0 +1,46 @@
+<button id="toggleSettingsBtn">Setting</button>
+
+<div id="settings" style="display: none; border: 1px solid #ccc; padding: 10px; margin-top: 10px; width: 300px;">
+  <button id="closeSettingsBtn" style="float: right;">닫기</button>
+  <h3>배경음 설정</h3>
+  <label>배경음 선택:
+    <select id="bgmSelect">
+      <option value="bgm1.mp3">BGM 1</option>
+      <option value="bgm2.mp3">BGM 2</option>
+      <option value="bgm3.mp3">BGM 3</option>
+    </select>
+  </label><br>
+  <label>배경음 On/Off:
+    <input type="checkbox" id="bgmToggle" checked>
+  </label><br>
+  <label>배경음 볼륨:
+    <input type="range" id="bgmVolume" min="0" max="1" step="0.01" value="0.5">
+  </label>
+
+  <h3>효과음 설정</h3>
+  <label>효과음 On/Off:
+    <input type="checkbox" id="sfxToggle" checked>
+  </label><br>
+  <label>효과음 볼륨:
+    <input type="range" id="sfxVolume" min="0" max="1" step="0.01" value="0.5">
+  </label>
+
+  
+ <h3>우주복 색상</h3>
+<div id="spacesuitColors">
+  <button class="color-btn" style="background-color: white;" data-color="#ffffff"></button>
+  <button class="color-btn" style="background-color: blue;" data-color="#0000ff"></button>
+  <button class="color-btn" style="background-color: cyan;" data-color="#00ffff"></button>
+  <button class="color-btn" style="background-color: green;" data-color="#00ff00"></button>
+  <button class="color-btn" style="background-color: orange;" data-color="#ffa500"></button>
+  <button class="color-btn" style="background-color: violet;" data-color="#ee82ee"></button>
+  <button class="color-btn" style="background-color: red;" data-color="#ff0000"></button>
+  <button class="color-btn" style="background-color: purple;" data-color="#800080"></button>
+  <button class="color-btn" style="background-color: yellow;" data-color="#ffff00"></button>
+</div>
+
+<input type="hidden" id="selectedColor" value="#ffffff">
+
+
+  <button onclick="applySettings()">설정 적용</button>
+</div>
