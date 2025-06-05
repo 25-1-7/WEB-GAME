@@ -88,24 +88,21 @@ function startCanvasGameUI() {
   $(".background").remove(); // 배경 제거
   $("body").css("background", "black"); // 혹시라도 남은 배경 제거
 
+
    // 🎯 게임 UI 삽입
   $(".content").html(`
-    <div class="game-ui">
-    <div class="top-bar">
-      <select id="difficultySelect">
-        <option value="1">난이도 1 (하단 제외 반사)</option>
-        <option value="2">난이도 2 (상하 제외 반사)</option>
-        <option value="3">난이도 3 (사방 게임오버)</option>
-      </select>
-      <button id="startBtn">게임 시작</button>
-    </div>
+
+    <div id= game-wrapper>
 
       <div id="game-info-bar">
       <div id="scoreBoard">점수: 0</div>
       <div id="goalBoard">목표: 100</div>
-      <div id="timerBoard">남은 시간: 60s</div>
+      <div id="timerBoard">남은 시간: 45s</div>
       </div>
+      
       <canvas id="gameCanvas" width="800" height="600" style="background: url('scImg04.png'); background-size:cover;" ></canvas>
+     
+    </div>
     </div>
   `);
 
@@ -116,13 +113,63 @@ $("#startBtn").on("click", function () {
 });
 }
 
+/*
+$(".content").html('
+    <div class="game-ui">
+    <div class="top-bar">
+      <select id="difficultySelect">
+        <option value="1">난이도 1 (하단 제외 반사)</option>
+        <option value="2">난이도 2 (상하 제외 반사)</option>
+        <option value="3">난이도 3 (사방 게임오버)</option>
+      </select>
+      <button id="startBtn">게임 시작</button>
+    </div>'
+
+  );
+  */
+
+
+
+let selectedDifficulty = 1; // 기본값
+
+
+//난이도 선택 버튼들을 클릭했을 때 이벤트리스너
+$(document).on("click", ".diff-menu", function () {
+  $(".diff-menu").removeClass("selected");
+  $(this).addClass("selected");
+  selectedDifficulty = $(this).data("value");
+});
+
+
+//startBtn 버튼 타입 사용 안 하고 리스너 생성 
+$(document).on("click", "#startBtn", function () {
+  startCanvasGameUI();//게임 UI 시작
+  runPaddleBrickGame(selectedDifficulty);
+});
+
+//난이도를 선택하는 함수
+function difficultySlection() {
+  $(".content").html(`
+    <div class="game-ui">
+      <div class="diffselect-bar">
+        <div id="startBtn">Game Start</div>
+        <div id="difficultySelect">
+          <div class="diff-menu" data-value="1">난이도 1 <br>(하단 제외 반사)</div>
+          <div class="diff-menu" data-value="2">난이도 2 <br>(상하 제외 반사)</div>
+          <div class="diff-menu" data-value="3">난이도 3 <br>(사방 게임오버)</div>
+        </div>
+      </div>
+    </div>
+  `);
+}
+
 
 function initCanvasGame(difficulty) {
   const canvas = document.getElementById("gameCanvas");
   const ctx = canvas.getContext("2d");
 
   let score = 0;
-  let timeLeft = 60;
+  let timeLeft = 45;
 
   const player = { x: 370, y: 560, width: 60, height: 20, speed: 5 };
   const debris = [];
@@ -211,9 +258,9 @@ function endScenario() {
   $(".background").css("filter", "brightness(1)");
   $(".title, .menu").addClass("hidden"); // 메뉴는 숨기고
   currentLine = 0;
+  difficultySlection();
 
-  // 게임 UI 시작
-  startCanvasGameUI();
+
 }
 
 
@@ -323,10 +370,15 @@ function runPaddleBrickGame(difficultyValue) {
   const padding = 20;
   const brickWidth = 75;
   const brickHeight = 20;
-  const goal = 100;
+  let goal = 100;
+
+
+  if (difficulty === 1) goal = 100;
+  else if (difficulty === 2) goal = 125;
+  else if (difficulty === 3) goal = 150;
 
   let score = 0;
-  let timeLeft = 60;
+  let timeLeft = 45;
   let isGameRunning = true;
   let bonusMode = false;
   let greenHitCount = 0;
@@ -534,6 +586,15 @@ function runPaddleBrickGame(difficultyValue) {
         else return endGame("아래쪽 벽");
       }
     }
+
+    //목표 달성 시 게임 종료 
+     if (score >= goal) {
+    isGameRunning = false;
+    clearInterval(timer);
+    alert("목표 점수 달성! 게임 종료!");
+    //showEnding(); // 또는 다른 처리
+    return;
+  }
 
     ball.x += ball.dx;
     ball.y += ball.dy;
