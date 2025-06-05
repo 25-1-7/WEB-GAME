@@ -729,6 +729,26 @@ function collisionDetection() {
     ) {
       b.status = 0;
       ball.dy = -ball.dy;
+
+      // 인공위성 부딪힘이면 강한 흔들림, 아니면 기본 흔들림
+      const $wrapper = $("#game-wrapper")
+      if (b.type === "satellite") {
+        $wrapper.addClass("shake-strong")
+        setTimeout(() => {
+          $wrapper.removeClass("shake-strong")
+        }, 400) // 애니메이션 길이와 맞춤
+        // 이후 파편 생성 로직…
+      } else {
+        // trash/debris 충돌 시 기본 shake
+        $wrapper.addClass("shake")
+        setTimeout(() => {
+          $wrapper.removeClass("shake")
+        }, 300)
+        score += 10
+        flashBorder("glow-yellow")
+        updateScore()
+      }
+
       if (b.type === "satellite") {
   const debrisList = [
     "satellite/debris1.png",
@@ -777,6 +797,11 @@ function collisionDetection() {
         ball.y - ball.radius >= top.y &&
         ball.x >= top.x && ball.x <= top.x + top.width) {
       ball.dy = Math.abs(ball.dy);
+      const $wrapper = $("#game-wrapper")
+      $wrapper.addClass("shake")
+        setTimeout(() => {
+          $wrapper.removeClass("shake")
+        }, 300)
       flashBorder("glow-blue");
       return true;
     }
@@ -785,6 +810,11 @@ function collisionDetection() {
         ball.y + ball.radius <= bottom.y + bottom.height &&
         ball.x >= bottom.x && ball.x <= bottom.x + bottom.width) {
       ball.dy = -Math.abs(ball.dy);
+            const $wrapper = $("#game-wrapper")
+      $wrapper.addClass("shake")
+        setTimeout(() => {
+          $wrapper.removeClass("shake")
+        }, 300)
       flashBorder("glow-blue");
       return true;
     }
@@ -793,6 +823,11 @@ function collisionDetection() {
         ball.x - ball.radius >= left.x &&
         ball.y >= left.y && ball.y <= left.y + left.height) {
       ball.dx = Math.abs(ball.dx);
+            const $wrapper = $("#game-wrapper")
+      $wrapper.addClass("shake")
+        setTimeout(() => {
+          $wrapper.removeClass("shake")
+        }, 300)
       flashBorder("glow-blue");
       return true;
     }
@@ -801,6 +836,11 @@ function collisionDetection() {
         ball.x + ball.radius <= right.x + right.width &&
         ball.y >= right.y && ball.y <= right.y + right.height) {
       ball.dx = -Math.abs(ball.dx);
+            const $wrapper = $("#game-wrapper")
+      $wrapper.addClass("shake")
+        setTimeout(() => {
+          $wrapper.removeClass("shake")
+        }, 300)
       flashBorder("glow-blue");
       return true;
     }
