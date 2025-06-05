@@ -762,7 +762,7 @@ function collisionDetection() {
     else {
         // trash or debris
         score += 10;
-         flashBorder("glow-yellow");
+  flashBorder("glow-blue");
         updateScore();
       }
     }
