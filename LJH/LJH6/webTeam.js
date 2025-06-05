@@ -488,7 +488,11 @@ function runPaddleBrickGame(difficultyValue) {
   const brickWidth = 75;
   const brickHeight = 20;
   let goal = 100;
-
+  const playerImg = new Image()
+  playerImg.src = "player/astro_basic.png"  // 실제 경로에 맞게 수정
+// 패들 이미지를 하나의 Image 객체로 미리 로드
+  const barrierImg = new Image();
+  barrierImg.src = "barrier.gif"; 
 
   if (difficulty === 1) goal = 100;
   else if (difficulty === 2) goal = 125;
@@ -590,20 +594,60 @@ function loseLifeAndResetBall() {
   }
 
   function drawBall() {
-    ctx.beginPath();
-    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-    ctx.fillStyle = "white";
-    ctx.fill();
-    ctx.closePath();
+if (playerImg.complete) {
+    const size = ball.radius * 7  // 원래 공 지름만큼 크기
+    ctx.drawImage(playerImg, ball.x - ball.radius, ball.y - ball.radius, size, size)
+  } else {
+    // 아직 로드 안 됐으면 기본 원으로 그려도 되고 빈 칸 둬도 됨
+    ctx.beginPath()
+    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 7)
+    ctx.fillStyle = "white"
+    ctx.fill()
+    ctx.closePath()
+  }
   }
 
-  function drawPaddles() {
-    ctx.fillStyle = "white";
-    for (const key in paddles) {
-      const p = paddles[key];
-      ctx.fillRect(p.x, p.y, p.width, p.height);
+function drawPaddles() {
+  for (const key in paddles) {
+    const p = paddles[key]
+    // 패들 중심점 계산
+    const cx = p.x + p.width / 2
+    const cy = p.y + p.height / 2
+
+    ctx.save()
+    if (key === "left" || key === "right") {
+      // 왼쪽·오른쪽 패들은 90도 회전
+      // 회전 축을 패들 중심(cx, cy)로 옮기고, Math.PI/2 만큼 회전
+      ctx.translate(cx, cy)
+      ctx.rotate(Math.PI / 2)
+      // barrierImg 원본이 가로 모양이므로, 회전 후에는 크기를 바꿔야 세로로 보임
+      // 변환된 좌표계에 맞춰서 draw
+      // 이때 drawImage(x, y, w, h)에서 w=패들 높이, h=패들 너비
+      if (barrierImg.complete) {
+        ctx.drawImage(barrierImg,
+          -p.height / 2,   // 회전 후 x 위치: 중심에서 위로(절반 높이) 
+          -p.width / 2,    // 회전 후 y 위치: 중심에서 왼쪽(절반 너비)
+          p.height,        // 회전된 이미지 폭 -> 원래 패들 높이
+          p.width)         // 회전된 이미지 높이 -> 원래 패들 너비
+      } else {
+        // 만약 이미지 로드가 완료 안 됐으면 fallback
+        // 원래 패들이 10x100인데 회전했으니 drawRect도 같은 식으로
+        ctx.fillStyle = "white"
+        ctx.fillRect(-p.height / 2, -p.width / 2, p.height, p.width)
+      }
+    } else {
+      // top, bottom 패들은 가로 모양 그대로 그리기
+      if (barrierImg.complete) {
+        ctx.drawImage(barrierImg, p.x, p.y, p.width, p.height)
+      } else {
+        ctx.fillStyle = "white"
+        ctx.fillRect(p.x, p.y, p.width, p.height)
+      }
     }
+    ctx.restore()
   }
+}
+
 
   function drawBricks() {
   bricks.forEach(b => {
