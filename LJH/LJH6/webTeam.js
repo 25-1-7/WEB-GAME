@@ -777,6 +777,7 @@ function collisionDetection() {
         ball.y - ball.radius >= top.y &&
         ball.x >= top.x && ball.x <= top.x + top.width) {
       ball.dy = Math.abs(ball.dy);
+      flashBorder("glow-blue");
       return true;
     }
 
@@ -784,6 +785,7 @@ function collisionDetection() {
         ball.y + ball.radius <= bottom.y + bottom.height &&
         ball.x >= bottom.x && ball.x <= bottom.x + bottom.width) {
       ball.dy = -Math.abs(ball.dy);
+      flashBorder("glow-blue");
       return true;
     }
 
@@ -791,6 +793,7 @@ function collisionDetection() {
         ball.x - ball.radius >= left.x &&
         ball.y >= left.y && ball.y <= left.y + left.height) {
       ball.dx = Math.abs(ball.dx);
+      flashBorder("glow-blue");
       return true;
     }
 
@@ -798,6 +801,7 @@ function collisionDetection() {
         ball.x + ball.radius <= right.x + right.width &&
         ball.y >= right.y && ball.y <= right.y + right.height) {
       ball.dx = -Math.abs(ball.dx);
+      flashBorder("glow-blue");
       return true;
     }
 
