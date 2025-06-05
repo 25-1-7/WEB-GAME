@@ -124,7 +124,7 @@ $(".content").html(`
       <img src="infoBarImg.gif" class="info-light left-light" />
       <div id="scoreBoard">점수: 0</div>
       <div id="goalBoard">목표: 100</div>
-      <div id="lifeBoard">HP: ❤️❤️❤️</div>
+      <div id="lifeBoard">HP: ■■■</div>
       <img src="infoBarImg.gif" class="info-light right-light" />
     </div>
     
@@ -173,9 +173,9 @@ function showStageExplanation() {
     "게임 설명 !!",
     "당신은 우주청소부의 보조 도우미입니다. 최첨단 패널을 마우스로 조종하여 우주청소부가 우주 밖으로 날아가지 않도록 도와주세요.",
     "우주청소부가 쓰레기에 가까이 다가가면 쓰레기를 회수할 수 있습니다.",
-    "인공위성은 회수할 수 없습니다. 또한 인공위성과 부딪히면 안됩니다! 위험은 둘째 치고 더 많은 우주쓰레기를 만들거에요.",
-    "달의 궤도 안정화까지 제한된 기회가 있습니다.",
-    "목표 점수를 달성하면 게임 클리어!"
+    "인공위성은 회수할 수 없습니다. 또한 인공위성과 부딪히면 안됩니다! 인공위성과의 충돌은 더 많은 우주쓰레기를 만듭니다...",
+    "달의 궤도 안정화까지 제한된 기회가 있습니다...",
+    "목표 점수를 달성하면 게임 클리어 !!"
   ];
 
   let currentIndex = 0;
@@ -214,7 +214,15 @@ function showStageExplanation() {
     const $mainImg = $("<img>")
       .attr("src", baseImg)
       .addClass("scenario-img overlay-img explain-overlay");
-
+      if (baseImg === "exImg/exImg01.png") {
+        $mainImg.css({
+          width: "120px",     // 원하는 크기로 조절
+          height: "auto",     // 비율 유지
+          top: "60px",        // 위치 조정 (필요 시)
+          left: "80px", // 가운데 정렬
+          position: "absolute"
+        });
+      }
     $imgWrapper.append($white, $mainImg);
   }
 
@@ -457,48 +465,6 @@ $(document).on("click", ".credit-close", function () {
   $(".credit-overlay").remove();
 });
 
-const endingTexts = [
-  "달의 궤도는 다시 안정되었고...",
-  "우주의 쓰레기는 정리되었다...",
-  "Game Clear!!"
-];
-
-const endingImage = "ending.png";
-let endingLine = 0;
-
-function showEnding() {
-  darkenBg();
-  endingLine = 0;
-
-  $(".content").empty();
-
-  const $scenario = $("<div>").addClass("scenario");
-  const $imgWrapper = $("<div>").addClass("scenario-img-wrapper").append(
-    $("<img>").attr("src", endingImage).addClass("scenario-img")
-  );
-
-  const $text = $("<div>").addClass("scenario-text").text(endingTexts[endingLine]);
-
-  const $buttonBox = $("<div>").addClass("scenario-links");
-  const $next = $("<span>").addClass("link-text ending-next").text("Next");
-  const $main = $("<span>").addClass("link-text to-main").text("Main");
-  const $restart = $("<span>").addClass("link-text restart-game").text("Restart");
-
-  $buttonBox.append($next, $main, $restart);
-
-  $scenario.append($imgWrapper, $text, $buttonBox);
-  $(".content").append($scenario);
-}
-
-$(document).on("click", ".ending-next", function () {
-  endingLine++;
-  if (endingLine < endingTexts.length) {
-    $(".scenario-text").text(endingTexts[endingLine]);
-  } else {
-    showMainMenu();          // 모든 문장 끝나면 메인으로
-  }
-});
-
 $(document).on("click", ".to-main", function () {
   showMainMenu();
 });
@@ -637,7 +603,7 @@ bricks.push({
  function updateUI() {
   $("#scoreBoard").text(`[score: ${score}]`);
   $("#goalBoard").text(`[goal: ${goal}]`);
-  $("#lifeBoard").text(`[HP: ${"❤️".repeat(lives)}]`);
+  $("#lifeBoard").text(`[HP: ${"■".repeat(lives)}]`);
 }
 function loseLifeAndResetBall() {
   lives--;
@@ -972,7 +938,7 @@ function collisionDetection() {
      if (score >= goal) {
     isGameRunning = false;
     clearInterval(timer);
-    showEnding(); // 또는 다른 처리
+    showEnding(score); // 또는 다른 처리
     return;
   }
 
@@ -1097,6 +1063,49 @@ function showSpecialEnding(score) {
     "그의 마지막 임무는 실패로 끝났습니다..."
   ]);
 }
+
+const endingTexts = [
+  "달의 궤도는 다시 안정되었고...",
+  "우주의 쓰레기는 정리되었다...",
+  "Game Clear!!"
+];
+
+const endingImage = "ending.png";
+let endingLine = 0;
+
+function showEnding(score) {
+  darkenBg();
+  endingLine = -1; // 첫 문장은 별도 처리 > -1부터 시작
+
+  $(".content").empty();
+
+  const $scenario = $("<div>").addClass("scenario");
+  const $imgWrapper = $("<div>").addClass("scenario-img-wrapper").append(
+    $("<img>").attr("src", endingImage).addClass("scenario-img")
+  );
+
+  // 점수 안내
+  const $text = $("<div>").addClass("scenario-text").text(`축하합니다 !! 당신의 점수는 ${score}점입니다 !!`);
+
+  const $buttonBox = $("<div>").addClass("scenario-links");
+  const $next = $("<span>").addClass("link-text ending-next").text("Next");
+  const $main = $("<span>").addClass("link-text to-main").text("Main");
+  const $restart = $("<span>").addClass("link-text restart-game").text("Restart");
+
+  $buttonBox.append($next, $main, $restart);
+  $scenario.append($imgWrapper, $text, $buttonBox);
+  $(".content").append($scenario);
+}
+
+$(document).on("click", ".ending-next", function () {
+  endingLine++;
+
+  if (endingLine < endingTexts.length) {
+    $(".scenario-text").text(endingTexts[endingLine]);
+  } else {
+    showMainMenu(); // 끝나면 메인으로
+  }
+});
 
 
 
