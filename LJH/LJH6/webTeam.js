@@ -595,12 +595,12 @@ function loseLifeAndResetBall() {
 
   function drawBall() {
 if (playerImg.complete) {
-    const size = ball.radius * 5  // 원래 공 지름만큼 크기
+    const size = ball.radius * 4  // 원래 공 지름만큼 크기
     ctx.drawImage(playerImg, ball.x - ball.radius, ball.y - ball.radius, size, size)
   } else {
     // 아직 로드 안 됐으면 기본 원으로 그려도 되고 빈 칸 둬도 됨
     ctx.beginPath()
-    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 5)
+    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 4)
     ctx.fillStyle = "white"
     ctx.fill()
     ctx.closePath()
