@@ -513,6 +513,19 @@ function runPaddleBrickGame(difficultyValue) {
     radius: 10,
   };
 
+  // -------------------------------------------------
+  // ★ 불빛 효과를 위해 helper 함수 정의
+  function flashBorder(colorClass) {
+    // colorClass는 "glow-red" 또는 "glow-yellow"
+    $("#game-wrapper").addClass(colorClass);
+    // 200ms 뒤에 자동으로 클래스 제거
+    setTimeout(() => {
+      $("#game-wrapper").removeClass(colorClass);
+    }, 200);
+  }
+  // -------------------------------------------------
+
+
   const paddles = {
     top: { x: (canvas.width - 100) / 2, y: padding, width: 100, height: 10 },
     bottom: { x: (canvas.width - 100) / 2, y: canvas.height - padding - 10, width: 100, height: 10 },
@@ -569,7 +582,7 @@ bricks.push({
 function loseLifeAndResetBall() {
   lives--;
   updateUI();
-
+ flashBorder("glow-red");
   if (lives <= 0) {
     endGame("하트 소진");
     return;
@@ -581,6 +594,9 @@ function loseLifeAndResetBall() {
   ball.dx = 4;
   ball.dy = -4;
 }
+
+
+
   function updateScore() {
     $("#scoreBoard").text(`[score: ${score}]`);
   }
@@ -746,6 +762,7 @@ function collisionDetection() {
     else {
         // trash or debris
         score += 10;
+         flashBorder("glow-yellow");
         updateScore();
       }
     }
