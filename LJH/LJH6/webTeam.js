@@ -879,6 +879,7 @@ if (bricks.filter(b => b.status === 1).length === 0) {
     if (!isGameRunning) return;
     timeLeft--;
     updateTimer();
+    /*
     if (timeLeft <= 0) {
       clearInterval(timer);
       if (score >= goal) {
@@ -887,7 +888,7 @@ if (bricks.filter(b => b.status === 1).length === 0) {
       } else {
         endGame("시간 초과");
       }
-    }
+    }*/
   }, 1000);
 }
 
