@@ -632,8 +632,8 @@ function runPaddleBrickGame(difficultyValue) {
   const ball = {
     x: canvas.width / 2,
     y: canvas.height / 2,
-    dx: 4,
-    dy: -4,
+    dx: 2,
+    dy: -2,
     radius: 10,
   };
 
@@ -704,7 +704,10 @@ if (isBad) {
         dy: 0,
         status: 1,
         type: "static",
-        img: null
+        img: null,
+        renderWidth: 30,
+        renderHeight: 30,
+        preserveAspect: true
       });
     });
   }
@@ -906,6 +909,40 @@ function drawPaddles() {
   }
 
 function collisionDetection() {
+  // 공과 static 블럭 충돌 체크 (수동)
+bricks.forEach(b => {
+  if (b.status !== 1 || b.type !== "static") return;
+
+  const bw = b.renderWidth || brickWidth;
+  const bh = b.renderHeight || brickHeight;
+
+  const isColliding =
+    ball.x + ball.radius > b.x &&
+    ball.x - ball.radius < b.x + bw &&
+    ball.y + ball.radius > b.y &&
+    ball.y - ball.radius < b.y + bh;
+
+  if (isColliding) {
+    // 충돌 방향 계산
+    const overlapX = Math.min(ball.x + ball.radius - b.x, b.x + bw - (ball.x - ball.radius));
+    const overlapY = Math.min(ball.y + ball.radius - b.y, b.y + bh - (ball.y - ball.radius));
+
+    if (overlapX < overlapY) {
+      ball.dx *= -1;
+    } else {
+      ball.dy *= -1;
+    }
+
+    // 블럭 파괴 처리
+    b.status = 0;
+
+    // 효과
+    const $wrapper = $("#game-wrapper");
+    $wrapper.addClass("shake");
+    setTimeout(() => $wrapper.removeClass("shake"), 300);
+    flashBorder("glow-blue");
+  }
+});
   bricks.forEach(b => {
     const bw = b.renderWidth || brickWidth;
     const bh = b.renderHeight || brickHeight;
@@ -916,9 +953,7 @@ function collisionDetection() {
       ball.y + ball.radius > b.y &&
       ball.y - ball.radius < b.y + bh
     ) {
-      if (b.type !== "static") {
         b.status = 0;
-      }
       // 충돌 방향 계산
       const overlapX = Math.min(ball.x + ball.radius - b.x, b.x + bw - (ball.x - ball.radius));
       const overlapY = Math.min(ball.y + ball.radius - b.y, b.y + bh - (ball.y - ball.radius));
@@ -977,9 +1012,29 @@ function collisionDetection() {
       }
     else if (b.type !== "static") {
         // trash or debris
-        score += 10;
-         flashBorder("glow-yellow");
-        updateScore();
+        // 공이 정적 블럭과 충돌했을 때 확실하게 튕기기
+ // 공이 static 블럭에 부딪힘
+  const prevX = ball.x - ball.dx;
+  const prevY = ball.y - ball.dy;
+
+  const fromLeft = prevX + ball.radius <= b.x;
+  const fromRight = prevX - ball.radius >= b.x + bw;
+  const fromTop = prevY + ball.radius <= b.y;
+  const fromBottom = prevY - ball.radius >= b.y + bh;
+
+  // 우선순위: 좌우 → 상하
+  if (fromLeft || fromRight) {
+    ball.dx *= -1;
+  } else if (fromTop || fromBottom) {
+    ball.dy *= -1;
+  } else {
+    // 예외적으로 대각선 or 중심박힘 → 둘 다 반전
+    ball.dx *= -1;
+    ball.dy *= -1;
+  }
+
+  b.status = 0;
+         flashBorder("glow-blue");
       }
     }
   });
@@ -1068,10 +1123,10 @@ function collisionDetection() {
     moveBricks();
     drawBall();
     drawPaddles();
-    collisionDetection();
-
+   
+   collisionDetection();
     const reflected = checkPaddleCollision();
-
+     collisionDetection();
      if (!reflected) {
     if (ball.x - ball.radius <= 0) {
       if (difficulty <= 2) {
