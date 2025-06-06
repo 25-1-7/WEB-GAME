@@ -486,4 +486,65 @@ body {
     object-fit: contain;
     margin: 0 auto;
   }
+
+#settings-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+#settings {
+  background: rgba(0, 0, 0, 0.75);
+  color: #fff;
+  padding: 20px;
+  width: 320px;
+  border: 1px solid #0ff;
+  border-radius: 10px;
+  box-shadow: 0 0 20px #0ff;
+  position: relative;
+}
+
+#closeSettingsBtn {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  background: none;
+  border: none;
+  color: #0ff;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+#settings select,
+#settings input[type="range"] {
+  margin-top: 5px;
+  margin-bottom: 10px;
+  width: 100%;
+  padding: 5px;
+  border-radius: 5px;
+  border: none;
+  background: #111;
+  color: #0ff;
+}
+
+#settings button {
+  background: #0ff;
+  color: #000;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+#settings button:hover {
+  background: #00faff;
+}
   
