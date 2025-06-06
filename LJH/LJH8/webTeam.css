@@ -130,6 +130,9 @@ body {
     cursor: pointer;
     transition: 0.3s;
 }
+.menu-item:hover {
+    text-shadow: 0 0 10px white;
+}
 
 #difficultySelect{
     padding: 50px 0;
@@ -158,6 +161,14 @@ body {
         2px -2px 0 #000,
         -2px 2px 0 #000,
         2px 2px 0 #000;
+}
+.diff-menu .top-scores{
+    display:none;
+    font-size:14px;
+    margin-top:5px;
+}
+.diff-menu:hover .top-scores{
+    display:block;
 }
 
 #startBtn {
@@ -430,10 +441,39 @@ body {
 
 #game-wrapper{
     width: 800px;
-    margin:0 auto; 
+    margin:0 auto;
     position:relative;
-    display:flex;              
-    flex-direction:column;  
+    display:flex;
+    flex-direction:column;
+}
+
+#outside-info{
+    position:fixed;
+    bottom:10px;
+    left:50%;
+    transform:translateX(-50%);
+    display:flex;
+    justify-content: center;
+    align-items:center;
+    gap:10px;
+    font-family:'DungGeunMo';
+    color:white;
+}
+
+#outside-info input{
+    font-family:'DungGeunMo';
+    width:120px;
+}
+
+#endingBtn.highlight{
+    animation: ending-glow 1s infinite;
+    border:1px solid yellow;
+    padding:2px 8px;
+}
+
+@keyframes ending-glow{
+    0%,100%{ box-shadow:0 0 5px yellow; }
+    50%{ box-shadow:0 0 15px yellow; }
 }
 
 .diffselect-bar {
