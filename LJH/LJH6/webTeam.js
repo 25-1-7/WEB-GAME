@@ -28,6 +28,11 @@ const bgmGame = new Audio("BGM/Occam.mp3");
 bgmTitle.loop = true;
 bgmGame.loop = true;
 
+// ----- Setting controls from HYG -----
+let bgmAudio = new Audio();
+let sfxEnabled = true;
+let sfxVolume = 0.5;
+
 
 const scenarioImages = [
   ["scImg01.png"],
@@ -391,6 +396,14 @@ $(document).on("click", "#credit", function () {
     );
     $("body").append($credit);
   }
+});
+
+$(document).on("click", "#setting", function () {
+  $("#settings-overlay").show();
+});
+
+$(document).on("click", "#closeSettingsBtn", function () {
+  $("#settings-overlay").hide();
 });
 
 $(document).on("click", ".credit-close", function () {
@@ -1044,4 +1057,32 @@ function darkenBg(){
 function restoreBg(){
   $(".background").css("filter","brightness(1)");
 }
+
+// -------------------
+// Setting functions
+// -------------------
+function applySettings() {
+  window.userBallColor = $("#ballColor").val();
+  const bgmFile = $("#bgmSelect").val();
+  const bgmToggle = $("#bgmToggle").is(":checked");
+  const bgmVolume = parseFloat($("#bgmVolume").val());
+
+  bgmAudio.src = bgmFile;
+  bgmAudio.loop = true;
+  bgmAudio.volume = bgmVolume;
+  if (bgmToggle) bgmAudio.play();
+  else bgmAudio.pause();
+
+  sfxEnabled = $("#sfxToggle").is(":checked");
+  sfxVolume = parseFloat($("#sfxVolume").val());
+}
+
+function playSFX(soundFile) {
+  if (!sfxEnabled) return;
+  const sfx = new Audio(soundFile);
+  sfx.volume = sfxVolume;
+  sfx.play();
+}
+
+window.applySettings = applySettings;
 
