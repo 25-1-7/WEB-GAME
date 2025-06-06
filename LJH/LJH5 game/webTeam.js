@@ -920,3 +920,43 @@ function restoreBg(){
   $(".background").css("filter","brightness(1)");
 }
 
+// ✅ 설정창 기능 통합 (기존 #setting 버튼과 연결)
+$(document).on("click", "#setting", function () {
+  $("#settings-overlay").fadeIn();
+});
+
+$(document).on("click", "#closeSettingsBtn", function () {
+  $("#settings-overlay").fadeOut();
+});
+
+$(document).on("click", ".color-btn", function () {
+  $(".color-btn").removeClass("selected");
+  $(this).addClass("selected");
+  $("#selectedColor").val($(this).data("color"));
+});
+
+// ✅ 설정 적용 함수 (전역 등록)
+function applySettings() {
+  const bgmFile = $("#bgmSelect").val();
+  const bgmToggle = $("#bgmToggle").is(":checked");
+  const bgmVolume = parseFloat($("#bgmVolume").val());
+
+  // 설정창 내 BGM 테스트용 오디오
+  if (!window.bgmAudio) {
+    window.bgmAudio = new Audio();
+    window.bgmAudio.loop = true;
+  }
+  bgmAudio.src = bgmFile;
+  bgmAudio.volume = bgmVolume;
+
+  if (bgmToggle) bgmAudio.play();
+  else bgmAudio.pause();
+
+  // 효과음 설정
+  window.sfxEnabled = $("#sfxToggle").is(":checked");
+  window.sfxVolume = parseFloat($("#sfxVolume").val());
+
+  // 우주복 색상 선택
+  const selectedSuitColor = $("#selectedColor").val();
+  console.log("선택된 우주복 색상:", selectedSuitColor);
+}

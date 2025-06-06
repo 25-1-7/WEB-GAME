@@ -399,4 +399,141 @@ body {
   .hidden {
     display: none !important;
   }
+
+
+body {
+  margin: 0;
+  font-family: 'Orbitron', sans-serif;
+  background-color: #111;
+  color: #fff;
+}
+
+#toggleSettingsBtn {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 101;
+  background: #0ff;
+  color: #000;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* 오버레이 */
+#settings-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+#settings {
+  background: white;
+  color: black;
+  padding: 30px;
+  border-radius: 10px;
+  width: 300px;
+  max-height: 380px;
+  overflow-y: auto;
+  font-family: 'DungGeunMo', sans-serif;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 0 15px #000;
+}
+
+
+#closeSettingsBtn {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 20px;
+  cursor: pointer;
+  color: black;
+  background: none;
+  border: none;
+}
+
+#settings h3 {
+  margin-top: 16px;
+  font-size: 18px;
+  border-bottom: 1px solid #000;
+  padding-bottom: 4px;
+}
+
+#settings label {
+  display: block;
+  margin-top: 10px;
+}
+
+#bgmVolume {
+  accent-color: yellow; /* 볼륨 조절 색상 포인트 */
+}
+
+#sfxVolume {
+  accent-color: yellow; /* 볼륨 조절 색상 포인트 */
+}
+
+#settings input[type="range"]::-webkit-slider-thumb {
+  background-color: yellow;
+}
+#settings input[type="range"]::-moz-range-thumb {
+  background-color: yellow;
+}
+#settings input[type="range"]::-ms-thumb {
+  background-color: yellow;
+}
+
+#settings input[type="checkbox"]:checked {
+  accent-color: yellow;
+}
+
+#settings input[type="range"],
+#settings select {
+  width: 100%;
+  margin-top: 4px;
+}
+
+#spacesuitColors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 10px;
+}
+
+.color-btn {
+  width: 30px;
+  height: 30px;
+  border: 2px solid #ccc;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.color-btn.selected {
+  border: 3px solid #000;
+}
+
+.rainbow {
+  background: linear-gradient(45deg, red, orange, yellow, green, cyan, blue, violet);
+}
+
+#settings button[onclick] {
+  background-color: #000;
+  color: #fff;
+  border: none;
+  padding: 10px;
+  border-radius: 6px;
+  width: 100%;
+  margin-top: 20px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
   
