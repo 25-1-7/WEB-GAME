@@ -33,6 +33,62 @@ bgmGame.loop = true;
 let sfxEnabled = true;
 let sfxVolume = 0.5;
 let selectedPlayerImage = "player/astro_basic.png";
+const GAME_VERSION = "v0.1";
+
+function getHighScores() {
+  const data = localStorage.getItem("sc_highscores");
+  return data ? JSON.parse(data) : {1: [], 2: [], 3: []};
+}
+
+function saveHighScores(obj) {
+  localStorage.setItem("sc_highscores", JSON.stringify(obj));
+}
+
+function recordHighScore(stage, name, score) {
+  const scores = getHighScores();
+  const arr = scores[stage] || [];
+  arr.push({ name, score });
+  arr.sort((a, b) => b.score - a.score);
+  scores[stage] = arr.slice(0, 3);
+  saveHighScores(scores);
+  localStorage.setItem("sc_lastName", name);
+}
+
+function getUnlockedStage() {
+  return parseInt(localStorage.getItem("sc_unlockedStage") || "1", 10);
+}
+
+function setUnlockedStage(stage) {
+  const current = getUnlockedStage();
+  if (stage > current) localStorage.setItem("sc_unlockedStage", stage);
+}
+
+function showPopup(message) {
+  const $popup = $(
+    `<div class="credit-overlay" id="msgPopup">\n` +
+      `<div class="credit-popup">` +
+        `<span class="credit-close">&times;</span>` +
+        `<p>${message}</p>` +
+      `</div>` +
+    `</div>`
+  );
+  $("body").append($popup);
+}
+
+$(document).on("click", "#msgPopup .credit-close", function () {
+  $("#msgPopup").remove();
+});
+
+function populateHighScores() {
+  const scores = getHighScores();
+  [1, 2, 3].forEach(stage => {
+    const arr = scores[stage] || [];
+    const html = arr
+      .map((s, i) => `${i + 1}. ${s.name}-${s.score}`)
+      .join("<br>") || "No Record";
+    $(`#scoreStage${stage}`).html(html);
+  });
+}
 
 function playSFX(soundFile) {
   if (!sfxEnabled) return;
@@ -129,7 +185,7 @@ function startCanvasGameUI() {
   $("body").css("background","black");
 
 
-$(".content").html(`
+  $(".content").html(`
 
   <div id="game-wrapper">
 
@@ -140,11 +196,19 @@ $(".content").html(`
       <div id="lifeBoard">HP: ■■■</div>
       <img src="infoBarImg.gif" class="info-light right-light" />
     </div>
-    
+
+    <div id="outside-info">
+      <label>이름: <input id="playerNameInput" type="text"></label>
+      <span id="versionTxt">${GAME_VERSION}</span>
+      <button id="endingBtn" style="display:none;">Ending</button>
+    </div>
+
     <canvas id="gameCanvas" width="800" height="600" style="background: url('scImg/scImg04.png'); background-size:cover;"></canvas>
-   
+
   </div>
 `);
+  const lastName = localStorage.getItem("sc_lastName") || "";
+  $("#playerNameInput").val(lastName);
 
 $("#startBtn").on("click", function () {
   $("#startBtn").hide();
@@ -300,9 +364,14 @@ let selectedDifficulty = 1; // 기본값
 
 //난이도 선택 버튼들을 클릭했을 때 이벤트리스너
 $(document).on("click", ".diff-menu", function () {
+  const stage = $(this).data("value");
+  if (stage > getUnlockedStage()) {
+    showPopup("이전 스테이지를 먼저 클리어하세요!");
+    return;
+  }
   $(".diff-menu").removeClass("selected");
   $(this).addClass("selected");
-  selectedDifficulty = $(this).data("value");
+  selectedDifficulty = stage;
 });
 
 let titleBgmStarted = false;
@@ -320,13 +389,14 @@ function difficultySlection() {
       <div class="diffselect-bar">
         <div id="startBtn">Game Start</div>
         <div id="difficultySelect">
-          <div class="diff-menu" data-value="1">Stage 1</div>
-          <div class="diff-menu" data-value="2">Stage 2</div>
-          <div class="diff-menu" data-value="3">Stage 3</div>
+          <div class="diff-menu" data-value="1">Stage 1<div class="top-scores" id="scoreStage1"></div></div>
+          <div class="diff-menu" data-value="2">Stage 2<div class="top-scores" id="scoreStage2"></div></div>
+          <div class="diff-menu" data-value="3">Stage 3<div class="top-scores" id="scoreStage3"></div></div>
         </div>
       </div>
     </div>
   `);
+  populateHighScores();
 }
 
 
@@ -549,6 +619,7 @@ function runPaddleBrickGame(difficultyValue) {
   let score = 0;
   let timeLeft = 45;
   let isGameRunning = true;
+  let endingShown = false;
   let bonusMode = false;
   let greenHitCount = 0;
   let timer;
@@ -603,6 +674,41 @@ if (isBad) {
   renderHeight = 60;
   preserveAspect = true; // trash는 비율 유지
 }
+
+  const staticLayouts = {
+    1: [
+      { x: 200, y: 150 },
+      { x: 300, y: 150 },
+      { x: 400, y: 150 }
+    ],
+    2: [
+      { x: 150, y: 120 },
+      { x: 600, y: 120 },
+      { x: 150, y: 280 },
+      { x: 600, y: 280 }
+    ],
+    3: [
+      { x: 200, y: 200 },
+      { x: 280, y: 200 },
+      { x: 360, y: 200 },
+      { x: 440, y: 200 },
+      { x: 320, y: 120 }
+    ]
+  };
+
+  if (staticLayouts[difficulty]) {
+    staticLayouts[difficulty].forEach(p => {
+      bricks.push({
+        x: p.x,
+        y: p.y,
+        dx: 0,
+        dy: 0,
+        status: 1,
+        type: "static",
+        img: null
+      });
+    });
+  }
 
 img = new Image();
 img.src = src;
@@ -716,10 +822,10 @@ function drawPaddles() {
   function drawBricks() {
   bricks.forEach(b => {
     if (b.status === 1) {
-      if (b.img.complete) {
+      if (b.img && b.img.complete) {
         ctx.drawImage(b.img, b.x, b.y, brickWidth, brickHeight);
       } else {
-        ctx.fillStyle = b.bad ? "red" : "gray"; // 로딩 안 됐을 때 대비
+        ctx.fillStyle = b.bad ? "red" : "gray";
         ctx.fillRect(b.x, b.y, brickWidth, brickHeight);
       }
       if (b.bad) {
@@ -956,12 +1062,10 @@ function collisionDetection() {
     }
   }
 
-    //목표 달성 시 게임 종료 
-     if (score >= goal) {
-    isGameRunning = false;
-    clearInterval(timer);
-    showEnding(score); // 또는 다른 처리
-    return;
+    //목표 달성 시 엔딩 버튼 활성화
+     if (!endingShown && score >= goal) {
+    endingShown = true;
+    $("#endingBtn").show();
   }
 
     ball.x += ball.dx;
@@ -1043,6 +1147,13 @@ if (bricks.filter(b => b.status === 1).length === 0) {
       }
     }*/
   }, 1000);
+
+  $("#endingBtn").off("click").on("click", function () {
+    recordHighScore(difficulty, $("#playerNameInput").val() || "Anon", score);
+    setUnlockedStage(difficulty + 1);
+    $(this).hide();
+    showEnding(score);
+  });
 }
 
 
