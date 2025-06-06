@@ -752,11 +752,15 @@ function loseLifeAndResetBall() {
   function updateScore() {
     $("#scoreBoard").text(`[score: ${score}]`);
     if (score >= goal) {
-      const top = (getHighScores()[difficulty] || [])[0];
-      if (!top || score >= top.score) {
+      const ranks = getHighScores()[difficulty] || [];
+      if (!ranks[0] || score >= ranks[0].score) {
         $("#goalBoard").text("신기록!");
+      } else if (!ranks[1] || score >= ranks[1].score) {
+        $("#goalBoard").text(`[1위 목표: ${ranks[0].score}]`);
+      } else if (!ranks[2] || score >= ranks[2].score) {
+        $("#goalBoard").text(`[2위 목표: ${ranks[1].score}]`);
       } else {
-        $("#goalBoard").text(`[1등: ${top.score}]`);
+        $("#goalBoard").text(`[3위 목표: ${ranks[2].score}]`);
       }
     } else {
       $("#goalBoard").text(`[goal: ${goal}]`);
@@ -912,7 +916,9 @@ function collisionDetection() {
       ball.y > b.y &&
       ball.y < b.y + bh
     ) {
-      b.status = 0;
+      if (b.type !== "static") {
+        b.status = 0;
+      }
       // 충돌 방향 계산
       const overlapX = Math.min(ball.x + ball.radius - b.x, b.x + bw - (ball.x - ball.radius));
       const overlapY = Math.min(ball.y + ball.radius - b.y, b.y + bh - (ball.y - ball.radius));
