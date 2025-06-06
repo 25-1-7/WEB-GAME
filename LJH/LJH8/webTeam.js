@@ -727,9 +727,8 @@ bricks.push({
 });
 
 }
- function updateUI() {
-  $("#scoreBoard").text(`[score: ${score}]`);
-  $("#goalBoard").text(`[goal: ${goal}]`);
+function updateUI() {
+  updateScore();
   $("#lifeBoard").text(`[HP: ${"■".repeat(lives)}]`);
 }
 function loseLifeAndResetBall() {
@@ -752,6 +751,16 @@ function loseLifeAndResetBall() {
 
   function updateScore() {
     $("#scoreBoard").text(`[score: ${score}]`);
+    if (score >= goal) {
+      const top = (getHighScores()[difficulty] || [])[0];
+      if (!top || score >= top.score) {
+        $("#goalBoard").text("신기록!");
+      } else {
+        $("#goalBoard").text(`[1등: ${top.score}]`);
+      }
+    } else {
+      $("#goalBoard").text(`[goal: ${goal}]`);
+    }
   }
 
   function updateTimer() {
@@ -819,42 +828,48 @@ function drawPaddles() {
 
 
   function drawBricks() {
-  bricks.forEach(b => {
-    if (b.status === 1) {
-      if (b.img && b.img.complete) {
-        ctx.drawImage(b.img, b.x, b.y, brickWidth, brickHeight);
-      } else {
-        ctx.fillStyle = b.bad ? "red" : "gray";
-        ctx.fillRect(b.x, b.y, brickWidth, brickHeight);
+    bricks.forEach(b => {
+      if (b.status === 1) {
+        const bw = b.renderWidth || brickWidth;
+        const bh = b.renderHeight || brickHeight;
+
+        if (b.img && b.img.complete) {
+          ctx.drawImage(b.img, b.x, b.y, bw, bh);
+        } else {
+          ctx.fillStyle = b.bad ? "red" : "gray";
+          ctx.fillRect(b.x, b.y, bw, bh);
+        }
+        if (b.bad) {
+          ctx.lineWidth = 2;
+          ctx.strokeStyle = "red";
+          ctx.strokeRect(b.x, b.y, bw, bh);
+        }
       }
-      if (b.bad) {
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = "red";
-        ctx.strokeRect(b.x, b.y, brickWidth, brickHeight);
-      }
-    }
-  });
-}
+    });
+  }
 
   function moveBricks() {
     bricks.forEach(b => {
       if (b.status === 1 && b.type !== "static") {
+        const bw = b.renderWidth || brickWidth;
+        const bh = b.renderHeight || brickHeight;
         b.x += b.dx;
         b.y += b.dy;
-        if (b.x < 0 || b.x + brickWidth > canvas.width) b.dx *= -1;
-        if (b.y < 0 || b.y + brickHeight > canvas.height) b.dy *= -1;
+        if (b.x < 0 || b.x + bw > canvas.width) b.dx *= -1;
+        if (b.y < 0 || b.y + bh > canvas.height) b.dy *= -1;
 
         bricks.forEach(s => {
-          if (s.type === "static" && s.status === 1 &&
-              b.x < s.x + brickWidth &&
-              b.x + brickWidth > s.x &&
-              b.y < s.y + brickHeight &&
-              b.y + brickHeight > s.y) {
-            if (Math.abs((b.x + brickWidth/2) - (s.x + brickWidth/2)) >
-                Math.abs((b.y + brickHeight/2) - (s.y + brickHeight/2))) {
-              b.dx *= -1;
-            } else {
-              b.dy *= -1;
+          if (s.type === "static" && s.status === 1) {
+            const sw = s.renderWidth || brickWidth;
+            const sh = s.renderHeight || brickHeight;
+            if (b.x < s.x + sw && b.x + bw > s.x &&
+                b.y < s.y + sh && b.y + bh > s.y) {
+              if (Math.abs((b.x + bw/2) - (s.x + sw/2)) >
+                  Math.abs((b.y + bh/2) - (s.y + sh/2))) {
+                b.dx *= -1;
+              } else {
+                b.dy *= -1;
+              }
             }
           }
         });
@@ -888,17 +903,24 @@ function drawPaddles() {
 
 function collisionDetection() {
   bricks.forEach(b => {
+    const bw = b.renderWidth || brickWidth;
+    const bh = b.renderHeight || brickHeight;
     if (
       b.status === 1 &&
       ball.x > b.x &&
-      ball.x < b.x + brickWidth &&
+      ball.x < b.x + bw &&
       ball.y > b.y &&
-      ball.y < b.y + brickHeight
+      ball.y < b.y + bh
     ) {
-      if (b.type !== "static") {
-        b.status = 0;
+      b.status = 0;
+      // 충돌 방향 계산
+      const overlapX = Math.min(ball.x + ball.radius - b.x, b.x + bw - (ball.x - ball.radius));
+      const overlapY = Math.min(ball.y + ball.radius - b.y, b.y + bh - (ball.y - ball.radius));
+      if (overlapX < overlapY) {
+        ball.dx *= -1;
+      } else {
+        ball.dy *= -1;
       }
-      ball.dy = -ball.dy;
 
       // 인공위성 부딪힘이면 강한 흔들림, 아니면 기본 흔들림
       const $wrapper = $("#game-wrapper")
@@ -1077,11 +1099,11 @@ function collisionDetection() {
   }
 
     //목표 달성 시 엔딩 버튼 활성화
-     if (!endingShown && score >= goal) {
-    endingShown = true;
-    $("#goalBoard").text("1등 신기록");
-    $("#endingBtn").addClass("highlight").show();
-  }
+    if (!endingShown && score >= goal) {
+      endingShown = true;
+      updateScore();
+      $("#endingBtn").addClass("highlight").show();
+    }
 
     ball.x += ball.dx;
     ball.y += ball.dy;
