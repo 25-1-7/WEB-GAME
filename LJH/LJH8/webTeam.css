@@ -448,17 +448,32 @@ body {
 }
 
 #outside-info{
+    position:fixed;
+    bottom:10px;
+    left:50%;
+    transform:translateX(-50%);
     display:flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items:center;
+    gap:10px;
     font-family:'DungGeunMo';
     color:white;
-    margin:5px 0;
 }
 
 #outside-info input{
     font-family:'DungGeunMo';
     width:120px;
+}
+
+#endingBtn.highlight{
+    animation: ending-glow 1s infinite;
+    border:1px solid yellow;
+    padding:2px 8px;
+}
+
+@keyframes ending-glow{
+    0%,100%{ box-shadow:0 0 5px yellow; }
+    50%{ box-shadow:0 0 15px yellow; }
 }
 
 .diffselect-bar {

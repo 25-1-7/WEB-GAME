@@ -35,6 +35,12 @@ let sfxVolume = 0.5;
 let selectedPlayerImage = "player/astro_basic.png";
 const GAME_VERSION = "v0.1";
 
+$(function() {
+  $("#versionTxt").text(GAME_VERSION);
+  const lastName = localStorage.getItem("sc_lastName") || "";
+  $("#playerNameInput").val(lastName);
+});
+
 function getHighScores() {
   const data = localStorage.getItem("sc_highscores");
   return data ? JSON.parse(data) : {1: [], 2: [], 3: []};
@@ -199,16 +205,11 @@ function startCanvasGameUI() {
 
     <canvas id="gameCanvas" width="800" height="600" style="background: url('scImg/scImg04.png'); background-size:cover;"></canvas>
 
-    <div id="outside-info">
-      <label>이름: <input id="playerNameInput" type="text"></label>
-      <span id="versionTxt">${GAME_VERSION}</span>
-      <button id="endingBtn" style="display:none;">Ending</button>
-    </div>
-
   </div>
 `);
   const lastName = localStorage.getItem("sc_lastName") || "";
   $("#playerNameInput").val(lastName);
+  $("#endingBtn").removeClass("highlight").hide();
 
 $("#startBtn").on("click", function () {
   $("#startBtn").hide();
@@ -616,6 +617,10 @@ function runPaddleBrickGame(difficultyValue) {
   else if (difficulty === 2) goal = 125;
   else if (difficulty === 3) goal = 150;
 
+  if (localStorage.getItem(`sc_cleared_stage_${difficulty}`)) {
+    $("#goalBoard").text("1등 신기록");
+  }
+
   let score = 0;
   let timeLeft = 45;
   let isGameRunning = true;
@@ -677,22 +682,16 @@ if (isBad) {
 
   const staticLayouts = {
     1: [
-      { x: 200, y: 150 },
-      { x: 300, y: 150 },
-      { x: 400, y: 150 }
+      { x: 200, y: 150 }, { x: 300, y: 150 }, { x: 400, y: 150 }, { x: 500, y: 150 },
+      { x: 200, y: 350 }, { x: 300, y: 350 }, { x: 400, y: 350 }, { x: 500, y: 350 },
+      { x: 200, y: 250 }, { x: 500, y: 250 }
     ],
     2: [
-      { x: 150, y: 120 },
-      { x: 600, y: 120 },
-      { x: 150, y: 280 },
-      { x: 600, y: 280 }
+      { x: 250, y: 350 }, { x: 300, y: 250 }, { x: 350, y: 150 }, { x: 400, y: 250 }, { x: 450, y: 350 }
     ],
     3: [
-      { x: 200, y: 200 },
-      { x: 280, y: 200 },
-      { x: 360, y: 200 },
-      { x: 440, y: 200 },
-      { x: 320, y: 120 }
+      { x: 470, y: 250 }, { x: 350, y: 370 }, { x: 230, y: 250 }, { x: 350, y: 130 },
+      { x: 434, y: 334 }, { x: 265, y: 334 }, { x: 265, y: 165 }, { x: 434, y: 165 }
     ]
   };
 
@@ -839,11 +838,26 @@ function drawPaddles() {
 
   function moveBricks() {
     bricks.forEach(b => {
-      if (b.status === 1) {
+      if (b.status === 1 && b.type !== "static") {
         b.x += b.dx;
         b.y += b.dy;
         if (b.x < 0 || b.x + brickWidth > canvas.width) b.dx *= -1;
         if (b.y < 0 || b.y + brickHeight > canvas.height) b.dy *= -1;
+
+        bricks.forEach(s => {
+          if (s.type === "static" && s.status === 1 &&
+              b.x < s.x + brickWidth &&
+              b.x + brickWidth > s.x &&
+              b.y < s.y + brickHeight &&
+              b.y + brickHeight > s.y) {
+            if (Math.abs((b.x + brickWidth/2) - (s.x + brickWidth/2)) >
+                Math.abs((b.y + brickHeight/2) - (s.y + brickHeight/2))) {
+              b.dx *= -1;
+            } else {
+              b.dy *= -1;
+            }
+          }
+        });
       }
     });
   }
@@ -881,7 +895,9 @@ function collisionDetection() {
       ball.y > b.y &&
       ball.y < b.y + brickHeight
     ) {
-      b.status = 0;
+      if (b.type !== "static") {
+        b.status = 0;
+      }
       ball.dy = -ball.dy;
 
       // 인공위성 부딪힘이면 강한 흔들림, 아니면 기본 흔들림
@@ -892,7 +908,7 @@ function collisionDetection() {
           $wrapper.removeClass("shake-strong")
         }, 400) // 애니메이션 길이와 맞춤
         // 이후 파편 생성 로직…
-      } else {
+      } else if (b.type !== "static") {
         // trash/debris 충돌 시 기본 shake
         $wrapper.addClass("shake")
         setTimeout(() => {
@@ -930,10 +946,8 @@ function collisionDetection() {
       });
     });
   }, 1000);
-}
-
-
-    else {
+      }
+    else if (b.type !== "static") {
         // trash or debris
         score += 10;
          flashBorder("glow-yellow");
@@ -1065,7 +1079,8 @@ function collisionDetection() {
     //목표 달성 시 엔딩 버튼 활성화
      if (!endingShown && score >= goal) {
     endingShown = true;
-    $("#endingBtn").show();
+    $("#goalBoard").text("1등 신기록");
+    $("#endingBtn").addClass("highlight").show();
   }
 
     ball.x += ball.dx;
@@ -1153,7 +1168,8 @@ if (bricks.filter(b => b.status === 1).length === 0) {
     clearInterval(timer);
     recordHighScore(difficulty, $("#playerNameInput").val() || "Anon", score);
     setUnlockedStage(difficulty + 1);
-    $(this).hide();
+    localStorage.setItem(`sc_cleared_stage_${difficulty}`, "1");
+    $(this).removeClass("highlight").hide();
     showEnding(score);
   });
 }
