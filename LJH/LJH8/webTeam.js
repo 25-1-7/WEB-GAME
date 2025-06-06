@@ -197,13 +197,13 @@ function startCanvasGameUI() {
       <img src="infoBarImg.gif" class="info-light right-light" />
     </div>
 
+    <canvas id="gameCanvas" width="800" height="600" style="background: url('scImg/scImg04.png'); background-size:cover;"></canvas>
+
     <div id="outside-info">
       <label>이름: <input id="playerNameInput" type="text"></label>
       <span id="versionTxt">${GAME_VERSION}</span>
       <button id="endingBtn" style="display:none;">Ending</button>
     </div>
-
-    <canvas id="gameCanvas" width="800" height="600" style="background: url('scImg/scImg04.png'); background-size:cover;"></canvas>
 
   </div>
 `);
@@ -1149,6 +1149,8 @@ if (bricks.filter(b => b.status === 1).length === 0) {
   }, 1000);
 
   $("#endingBtn").off("click").on("click", function () {
+    isGameRunning = false;
+    clearInterval(timer);
     recordHighScore(difficulty, $("#playerNameInput").val() || "Anon", score);
     setUnlockedStage(difficulty + 1);
     $(this).hide();
