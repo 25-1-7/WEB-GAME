@@ -25,7 +25,44 @@
     <!-- 시나리오 및 게임이 들어갈 영역 -->
     <div class="content" id="gameContent" style="display: none;"></div>
   </div>
+  
+<div id="settings-overlay" style="display: none;">
+  <div id="settings">
+    <button id="closeSettingsBtn">닫기</button>
+    <h3>배경음 설정</h3>
+    <label>배경음 선택:
+      <select id="bgmSelect">
+        <option value="bgm1.mp3">BGM 1</option>
+        <option value="bgm2.mp3">BGM 2</option>
+        <option value="bgm3.mp3">BGM 3</option>
+      </select>
+    </label><br>
+    <label>배경음 On/Off:
+      <input type="checkbox" id="bgmToggle" checked>
+    </label><br>
+    <label>배경음 볼륨:
+      <input type="range" id="bgmVolume" min="0" max="1" step="0.01" value="0.5">
+    </label>
+
+    <h3>효과음 설정</h3>
+    <label>효과음 On/Off:
+      <input type="checkbox" id="sfxToggle" checked>
+    </label><br>
+    <label>효과음 볼륨:
+      <input type="range" id="sfxVolume" min="0" max="1" step="0.01" value="0.5">
+    </label>
+
+    <h3>우주복 색상</h3>
+    <div id="spacesuitColors">
+      <!-- 버튼 목록 -->
+    </div>
+
+    <input type="hidden" id="selectedColor" value="#ffffff">
+
+    <button onclick="applySettings()">설정 적용</button>
+  </div>
 </div>
+
 
 
 
