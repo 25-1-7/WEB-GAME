@@ -68,6 +68,17 @@ body {
     transition: 0.3s;
 }
 
+/* 메뉴 아이템에 마우스를 올렸을 때 빛나는 효과 */
+.menu-item:hover {
+    text-shadow:
+        0 0 10px rgb(253, 219, 48),
+        -2px -2px 0 white,
+        2px -2px 0 #000,
+        -2px 2px 0 #000,
+        2px 2px 0 #000;
+    transform: scale(1.05);
+}
+
 #difficultySelect{
     padding: 50px 0;
     display: flex;
@@ -106,6 +117,12 @@ body {
       2px 2px 0 #000;
   cursor: pointer;
   width: 300px;
+}
+
+#startBtn:hover {
+  background: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 0 20px rgb(253, 219, 48);
+  transform: scale(1.05);
 }
 
 .diff-menu.selected {
