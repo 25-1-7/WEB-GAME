@@ -911,10 +911,10 @@ function collisionDetection() {
     const bh = b.renderHeight || brickHeight;
     if (
       b.status === 1 &&
-      ball.x > b.x &&
-      ball.x < b.x + bw &&
-      ball.y > b.y &&
-      ball.y < b.y + bh
+      ball.x + ball.radius > b.x &&
+      ball.x - ball.radius < b.x + bw &&
+      ball.y + ball.radius > b.y &&
+      ball.y - ball.radius < b.y + bh
     ) {
       if (b.type !== "static") {
         b.status = 0;
@@ -1047,9 +1047,16 @@ function collisionDetection() {
   function endGame(where) {
     isGameRunning = false;
     clearInterval(timer);
-  
-    // 게임 오버 시점에 점수 기반 엔딩 화면 출력
-    showSpecialEnding(score)
+    $("#endingBtn").removeClass("highlight").hide();
+    recordHighScore(difficulty, $("#playerNameInput").val() || "Anon", score);
+    if (endingShown) {
+      setUnlockedStage(difficulty + 1);
+      localStorage.setItem(`sc_cleared_stage_${difficulty}`, "1");
+      showEnding(score);
+    } else {
+      // 게임 오버 시점에 점수 기반 엔딩 화면 출력
+      showSpecialEnding(score);
+    }
   }
   
 
