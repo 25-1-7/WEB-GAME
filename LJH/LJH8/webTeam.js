@@ -479,11 +479,11 @@ $(document).on("click", ".credit-close", function () {
 });
 
 $(document).on("click", "#setting", function () {
-  $("#settings-overlay").show();
+  $("#settings-overlay").css("display", "flex");
 });
 
 $(document).on("click", "#closeSettingsBtn", function () {
-  $("#settings-overlay").hide();
+  $("#settings-overlay").css("display", "none");
 });
 
 $(document).on("click", ".to-main", function () {
@@ -1157,6 +1157,7 @@ function applySettings() {
   const bgmToggle = $("#bgmToggle").is(":checked");
   const sfxToggle = $("#sfxToggle").is(":checked");
   const sVolume = parseFloat($("#sfxVolume").val());
+  const selectedBgm = $("#bgmSelect").val();
   selectedPlayerImage = $("#playerSelect").val();
 
   bgmTitle.volume = volume;
@@ -1169,6 +1170,14 @@ function applySettings() {
     bgmGame.pause();
   }
 
+  if (bgmGame.src.indexOf(selectedBgm) === -1) {
+    bgmGame.src = `BGM/${selectedBgm}`;
+    bgmGame.load();
+    if (bgmToggle) {
+      bgmGame.play().catch(()=>{});
+    }
+  }
+
   sfxEnabled = sfxToggle;
   sfxVolume = sVolume;
 
@@ -1176,7 +1185,7 @@ function applySettings() {
     window.playerImg.src = selectedPlayerImage;
   }
 
-  $("#settings-overlay").hide();
+  $("#settings-overlay").css("display", "none");
 }
 
 window.applySettings = applySettings;
