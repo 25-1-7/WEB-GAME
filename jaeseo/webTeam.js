@@ -383,6 +383,7 @@ function runPaddleBrickGame(difficultyValue) {
   let bonusMode = false;
   let greenHitCount = 0;
   let timer;
+  let spawnInterval;
 
   const ball = {
     x: canvas.width / 2,
@@ -553,6 +554,7 @@ function runPaddleBrickGame(difficultyValue) {
   function endGame(where) {
     isGameRunning = false;
     clearInterval(timer);
+    clearInterval(spawnInterval);
     alert(`${where}에 닿았습니다. 게임 오버`);
   }
 
@@ -588,9 +590,10 @@ function runPaddleBrickGame(difficultyValue) {
     }
 
     //목표 달성 시 게임 종료 
-     if (score >= goal) {
+    if (score >= goal) {
     isGameRunning = false;
     clearInterval(timer);
+    clearInterval(spawnInterval);
     alert("목표 점수 달성! 게임 종료!");
     //showEnding(); // 또는 다른 처리
     return;
@@ -620,12 +623,25 @@ function runPaddleBrickGame(difficultyValue) {
 
   draw();
 
+  // 잔해 수가 적을 때 주기적으로 새로운 잔해 생성
+  spawnInterval = setInterval(() => {
+    if (!isGameRunning) return;
+    const active = bricks.filter(b => b.status === 1).length;
+    if (active <= 3) {
+      spawnBricks({
+        x: Math.random() * (canvas.width - brickWidth),
+        y: Math.random() * (canvas.height - brickHeight)
+      });
+    }
+  }, 3000);
+
   timer = setInterval(() => {
     if (!isGameRunning) return;
     timeLeft--;
     updateTimer();
     if (timeLeft <= 0) {
       clearInterval(timer);
+      clearInterval(spawnInterval);
       if (score >= goal) {
         bonusMode = true;
         alert("목표 달성! 보너스 모드 시작!");
