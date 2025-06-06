@@ -29,6 +29,19 @@ bgmTitle.loop = true;
 bgmGame.loop = true;
 
 
+// settings values
+let sfxEnabled = true;
+let sfxVolume = 0.5;
+let selectedPlayerImage = "player/astro_basic.png";
+
+function playSFX(soundFile) {
+  if (!sfxEnabled) return;
+  const sfx = new Audio(soundFile);
+  sfx.volume = sfxVolume;
+  sfx.play();
+}
+
+
 const scenarioImages = [
   ["scImg/scImg01.png"],
   ["scImg/scImg02.png", "scImg/scImg03.png"],
@@ -465,6 +478,14 @@ $(document).on("click", ".credit-close", function () {
   $(".credit-overlay").remove();
 });
 
+$(document).on("click", "#setting", function () {
+  $("#settings-overlay").show();
+});
+
+$(document).on("click", "#closeSettingsBtn", function () {
+  $("#settings-overlay").hide();
+});
+
 $(document).on("click", ".to-main", function () {
   showMainMenu();
 });
@@ -514,8 +535,9 @@ function runPaddleBrickGame(difficultyValue) {
   const brickWidth = 75;
   const brickHeight = 20;
   let goal = 100;
-  const playerImg = new Image()
-  playerImg.src = "player/astro_basic.png"  // 실제 경로에 맞게 수정
+  const playerImg = new Image();
+  playerImg.src = selectedPlayerImage;
+  window.playerImg = playerImg;
 // 패들 이미지를 하나의 Image 객체로 미리 로드
   const barrierImg = new Image();
   barrierImg.src = "barrier.gif"; 
@@ -1129,3 +1151,32 @@ function darkenBg(){
 function restoreBg(){
   $(".background").css("filter","brightness(1)");
 }
+
+function applySettings() {
+  const volume = parseFloat($("#bgmVolume").val());
+  const bgmToggle = $("#bgmToggle").is(":checked");
+  const sfxToggle = $("#sfxToggle").is(":checked");
+  const sVolume = parseFloat($("#sfxVolume").val());
+  selectedPlayerImage = $("#playerSelect").val();
+
+  bgmTitle.volume = volume;
+  bgmGame.volume = volume;
+  if (bgmToggle) {
+    if (!bgmTitle.paused) bgmTitle.play().catch(()=>{});
+    if (!bgmGame.paused) bgmGame.play().catch(()=>{});
+  } else {
+    bgmTitle.pause();
+    bgmGame.pause();
+  }
+
+  sfxEnabled = sfxToggle;
+  sfxVolume = sVolume;
+
+  if (window.playerImg) {
+    window.playerImg.src = selectedPlayerImage;
+  }
+
+  $("#settings-overlay").hide();
+}
+
+window.applySettings = applySettings;
