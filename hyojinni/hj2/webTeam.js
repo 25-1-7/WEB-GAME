@@ -18,6 +18,32 @@ const satelliteMapping = {
   "satellite/debris4.png": ["satellite/debris1.png", "satellite/debris2.png"]
 };
 
+// 스테이지별로 고정된 쓰레기 위치
+const stageStaticTrash = {
+  1: [
+    { x: 100, y: 120 },
+    { x: 250, y: 160 },
+    { x: 400, y: 120 },
+    { x: 550, y: 160 },
+    { x: 325, y: 260 }
+  ],
+  2: [
+    { x: 150, y: 150 },
+    { x: 300, y: 200 },
+    { x: 450, y: 150 },
+    { x: 225, y: 300 },
+    { x: 375, y: 300 }
+  ],
+  3: [
+    { x: 120, y: 120 },
+    { x: 280, y: 120 },
+    { x: 440, y: 120 },
+    { x: 200, y: 280 },
+    { x: 360, y: 280 },
+    { x: 520, y: 280 }
+  ]
+};
+
 
 
 // 전역에 추가
@@ -600,6 +626,27 @@ bricks.push({
 });
 
 }
+
+// 스테이지 별 고정 쓰레기 배치
+const staticList = stageStaticTrash[difficulty] || [];
+staticList.forEach(pos => {
+  const img = new Image();
+  const src = trashImages[Math.floor(Math.random() * trashImages.length)];
+  img.src = src;
+  bricks.push({
+    x: pos.x,
+    y: pos.y,
+    dx: 0,
+    dy: 0,
+    status: 1,
+    type: "trash",
+    img,
+    src,
+    renderWidth: 60,
+    renderHeight: 60,
+    preserveAspect: true
+  });
+});
  function updateUI() {
   $("#scoreBoard").text(`[score: ${score}]`);
   $("#goalBoard").text(`[goal: ${goal}]`);
@@ -984,6 +1031,26 @@ if (bricks.filter(b => b.status === 1).length === 0) {
       preserveAspect
     });
   }
+
+  // 고정 쓰레기도 다시 배치
+  (stageStaticTrash[difficulty] || []).forEach(pos => {
+    const img = new Image();
+    const src = trashImages[Math.floor(Math.random() * trashImages.length)];
+    img.src = src;
+    bricks.push({
+      x: pos.x,
+      y: pos.y,
+      dx: 0,
+      dy: 0,
+      status: 1,
+      type: "trash",
+      img,
+      src,
+      renderWidth: 60,
+      renderHeight: 60,
+      preserveAspect: true
+    });
+  });
 }
     requestAnimationFrame(draw);
   }
