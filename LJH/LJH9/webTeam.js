@@ -28,6 +28,21 @@ const bgmGame = new Audio("BGM/Occam.mp3");
 bgmTitle.loop = true;
 bgmGame.loop = true;
 
+// 현재 진행 중인 게임 정리용
+let activeGameCleanup = null;
+
+function stopCurrentGame() {
+  if (activeGameCleanup) {
+    activeGameCleanup();
+    activeGameCleanup = null;
+  }
+}
+
+function isBgmEnabled() {
+  const $toggle = $("#bgmToggle");
+  return $toggle.length ? $toggle.is(":checked") : true;
+}
+
 
 // settings values
 let sfxEnabled = true;
@@ -165,7 +180,8 @@ function renderScenarioImage(imageList) {
 }
 
 $(document).on("click", "#start", function () {
-    if (!titleBgmStarted) {
+  stopCurrentGame();
+  if (!titleBgmStarted && isBgmEnabled()) {
     bgmTitle.play().catch(e => console.warn("타이틀 BGM 재생 실패:", e));
     titleBgmStarted = true;
   }
@@ -248,6 +264,7 @@ $(".content").html('
 
 //새 도움말 및 게임설명
 function showStageExplanation() {
+  stopCurrentGame();
   darkenBg();
 
   const explainImages = [
@@ -505,10 +522,14 @@ function endScenario() {
   $(".background").css("filter", "brightness(1)");
   $(".title, .menu").addClass("hidden"); // 메뉴는 숨기고
   currentLine = 0;
-    // BGM 전환
+  // BGM 전환
   bgmTitle.pause();
   bgmTitle.currentTime = 0;
-  bgmGame.play().catch(e => console.log("Game BGM Blocked:", e));
+  if (isBgmEnabled()) {
+    bgmGame.play().catch(e => console.log("Game BGM Blocked:", e));
+  }
+
+  stopCurrentGame();
 
   showStageExplanation();
 }
@@ -571,10 +592,12 @@ $(document).on("click", "#closeSettingsBtn", function () {
 });
 
 $(document).on("click", ".to-main", function () {
+  stopCurrentGame();
   showMainMenu();
 });
 
 function showMainMenu () {
+  stopCurrentGame();
   // 1) 기존 내용 싹 비우기
   $(".content").empty();
 
@@ -598,7 +621,9 @@ function showMainMenu () {
   bgmGame.pause();
   bgmGame.currentTime = 0;
 
-  bgmTitle.play().catch(e => console.warn("타이틀 BGM 재생 실패:", e));
+  if (isBgmEnabled()) {
+    bgmTitle.play().catch(e => console.warn("타이틀 BGM 재생 실패:", e));
+  }
 
   // 4) 상태 리셋
   currentLine = 0;
@@ -647,6 +672,10 @@ function runPaddleBrickGame(difficultyValue) {
   let bonusMode = false;
   let greenHitCount = 0;
   let timer;
+  activeGameCleanup = function() {
+    isGameRunning = false;
+    clearInterval(timer);
+  };
  let lives = 3;
  const initialBallSpeed = { dx: 3, dy: -3 };
   const ball = {
@@ -1230,6 +1259,7 @@ bricks.forEach(b => {
   function endGame(where) {
     isGameRunning = false;
     clearInterval(timer);
+    activeGameCleanup = null;
     $("#endingBtn").removeClass("highlight").hide();
     recordHighScore(difficulty, $("#playerNameInput").val() || "Anon", score);
     if (endingShown) {
@@ -1479,10 +1509,12 @@ $(document).on("click", ".ending-next", function () {
 
 
 $(document).on("click", ".to-main", function () {
+  stopCurrentGame();
   showMainMenu(); // 메인으로 이동
 });
 
 $(document).on("click", ".restart-game", function () {
+  stopCurrentGame();
   $(".background").show();
   $(".background").css("filter", "brightness(0.3)");
   currentLine = 0;
