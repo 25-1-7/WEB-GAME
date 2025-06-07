@@ -485,9 +485,9 @@ body {
   color: #fff;
   padding: 20px;
   width: 320px;
-  border: 1px solid #0ff;
+  border: 1px solid #ff0;
   border-radius: 10px;
-  box-shadow: 0 0 20px #0ff;
+  box-shadow: 0 0 20px #ff0;
   position: relative;
 }
 
@@ -497,7 +497,7 @@ body {
   right: 10px;
   background: none;
   border: none;
-  color: #0ff;
+  color: #ff0;
   font-size: 18px;
   cursor: pointer;
 }
@@ -512,11 +512,11 @@ body {
   border-radius: 5px;
   border: none;
   background: #111;
-  color: #0ff;
+  color: #ff0;
 }
 
 #settings button {
-  background: #0ff;
+  background: #ff0;
   color: #000;
   border: none;
   padding: 8px 16px;
@@ -526,6 +526,6 @@ body {
 }
 
 #settings button:hover {
-  background: #00faff;
+  background: #ffd700;
 }
   
