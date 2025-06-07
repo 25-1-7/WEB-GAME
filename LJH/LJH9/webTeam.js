@@ -204,6 +204,7 @@ function startCanvasGameUI() {
     </div>
 
     <canvas id="gameCanvas" width="800" height="600" style="background: url('scImg/scImg04.png'); background-size:cover;"></canvas>
+    <div id="countdown" class="countdown-overlay" style="display:none;"></div>
 
   </div>
 `);
@@ -635,13 +636,15 @@ function runPaddleBrickGame(difficultyValue) {
   let bonusMode = false;
   let greenHitCount = 0;
   let timer;
- let lives = 3; 
+ let lives = 3;
+ const initialBallSpeed = { dx: 4, dy: -4 };
   const ball = {
     x: canvas.width / 2,
     y: canvas.height / 2,
-    dx: 2,
-    dy: -2,
+    dx: 0,
+    dy: 0,
     radius: 10,
+    opacity: 1
   };
 
   // -------------------------------------------------
@@ -655,6 +658,23 @@ function runPaddleBrickGame(difficultyValue) {
     }, 200);
   }
   // -------------------------------------------------
+
+  function showCountdown(callback) {
+    const $c = $("#countdown");
+    let num = 3;
+    $c.text(num).show();
+    const iv = setInterval(() => {
+      num--;
+      if (num > 0) {
+        $c.text(num);
+      } else {
+        clearInterval(iv);
+        $c.hide();
+        if (callback) callback();
+      }
+    }, 1000);
+  }
+
 
 
   const paddles = {
@@ -741,21 +761,73 @@ function updateUI() {
   updateScore();
   $("#lifeBoard").text(`[HP: ${"■".repeat(lives)}]`);
 }
+function renderStatic() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawBricks();
+  drawBall();
+  drawPaddles();
+}
+
 function loseLifeAndResetBall() {
   lives--;
   updateUI();
- flashBorder("glow-red");
+  flashBorder("glow-red");
   playSFX("SFX/start.mp3");
   if (lives <= 0) {
     endGame("하트 소진");
     return;
   }
 
-  // 공 중앙으로 재배치
-  ball.x = canvas.width / 2;
-  ball.y = canvas.height / 2;
-  ball.dx = 4;
-  ball.dy = -4;
+  isGameRunning = false;
+  let stepsOut = 20;
+  const outDx = ball.dx;
+  const outDy = ball.dy;
+
+  function flyOut() {
+    ball.x += outDx;
+    ball.y += outDy;
+    renderStatic();
+    if (stepsOut-- > 0) {
+      requestAnimationFrame(flyOut);
+    } else {
+      returnCenter();
+    }
+  }
+
+  function returnCenter() {
+    const startX = ball.x;
+    const startY = ball.y;
+    let t = 0;
+    const frames = 20;
+    function step() {
+      t++;
+      ball.x = startX + (canvas.width / 2 - startX) * (t / frames);
+      ball.y = startY + (canvas.height / 2 - startY) * (t / frames);
+      renderStatic();
+      if (t < frames) {
+        requestAnimationFrame(step);
+      } else {
+        fadeIn();
+      }
+    }
+    step();
+  }
+
+  function fadeIn() {
+    ball.opacity = 0.5;
+    renderStatic();
+    setTimeout(() => {
+      ball.opacity = 1;
+      ball.x = canvas.width / 2;
+      ball.y = canvas.height / 2;
+      ball.dx = initialBallSpeed.dx;
+      ball.dy = initialBallSpeed.dy;
+      isGameRunning = true;
+      requestAnimationFrame(draw);
+    }, 500);
+  }
+
+  flyOut();
 }
 
 
@@ -787,17 +859,19 @@ function loseLifeAndResetBall() {
   }
 
   function drawBall() {
-if (playerImg.complete) {
-    const size = ball.radius * 4  // 원래 공 지름만큼 크기
-    ctx.drawImage(playerImg, ball.x - ball.radius, ball.y - ball.radius, size, size)
-  } else {
-    // 아직 로드 안 됐으면 기본 원으로 그려도 되고 빈 칸 둬도 됨
-    ctx.beginPath()
-    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 4)
-    ctx.fillStyle = "white"
-    ctx.fill()
-    ctx.closePath()
-  }
+    ctx.save();
+    ctx.globalAlpha = ball.opacity || 1;
+    if (playerImg.complete) {
+      const size = ball.radius * 4; // 원래 공 지름만큼 크기
+      ctx.drawImage(playerImg, ball.x - ball.radius, ball.y - ball.radius, size, size);
+    } else {
+      ctx.beginPath();
+      ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 4);
+      ctx.fillStyle = "white";
+      ctx.fill();
+      ctx.closePath();
+    }
+    ctx.restore();
   }
 
 function drawPaddles() {
@@ -1251,21 +1325,15 @@ if (bricks.filter(b => b.status === 1).length === 0) {
 
   draw();
 
-  timer = setInterval(() => {
-    if (!isGameRunning) return;
-    timeLeft--;
-    updateTimer();
-    /*
-    if (timeLeft <= 0) {
-      clearInterval(timer);
-      if (score >= goal) {
-        bonusMode = true;
-        alert("목표 달성! 보너스 모드 시작!");
-      } else {
-        endGame("시간 초과");
-      }
-    }*/
-  }, 1000);
+  showCountdown(() => {
+    ball.dx = initialBallSpeed.dx;
+    ball.dy = initialBallSpeed.dy;
+    timer = setInterval(() => {
+      if (!isGameRunning) return;
+      timeLeft--;
+      updateTimer();
+    }, 1000);
+  });
 
   $("#endingBtn").off("click").on("click", function () {
     isGameRunning = false;
