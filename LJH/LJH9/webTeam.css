@@ -630,4 +630,36 @@ body {
 #settings button:hover {
   background: #ffd700;
 }
+
+#floating-text-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.floating-text {
+  position: absolute;
+  font-family: 'DungGeunMo';
+  font-size: 24px;
+  color: #ff0;
+  animation: floatFade 1s forwards;
+  user-select: none;
+}
+
+.speed-text {
+  font-size: 30px;
+  color: #0f0;
+}
+
+.score-text {
+  color: #ff0;
+}
+
+@keyframes floatFade {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to { opacity: 0; transform: translateY(-30px) scale(1.5); }
+}
   

@@ -204,6 +204,7 @@ function startCanvasGameUI() {
     </div>
 
     <canvas id="gameCanvas" width="800" height="600" style="background: url('scImg/scImg04.png'); background-size:cover;"></canvas>
+    <div id="floating-text-container"></div>
     <div id="countdown" class="countdown-overlay" style="display:none;"></div>
 
   </div>
@@ -637,7 +638,7 @@ function runPaddleBrickGame(difficultyValue) {
   let greenHitCount = 0;
   let timer;
  let lives = 3;
- const initialBallSpeed = { dx: 4, dy: -4 };
+ const initialBallSpeed = { dx: 3, dy: -3 };
   const ball = {
     x: canvas.width / 2,
     y: canvas.height / 2,
@@ -646,6 +647,7 @@ function runPaddleBrickGame(difficultyValue) {
     radius: 10,
     opacity: 1
   };
+  let mousePos = { x: canvas.width / 2, y: canvas.height / 2 };
 
   // -------------------------------------------------
   // ★ 불빛 효과를 위해 helper 함수 정의
@@ -656,6 +658,17 @@ function runPaddleBrickGame(difficultyValue) {
     setTimeout(() => {
       $("#game-wrapper").removeClass(colorClass);
     }, 200);
+  }
+
+  function showFloatingText(text, x, y, extraClass) {
+    const $container = $("#floating-text-container");
+    const $t = $("<div>")
+      .addClass("floating-text")
+      .addClass(extraClass || "")
+      .text(text)
+      .css({ left: x + "px", top: y + "px" });
+    $container.append($t);
+    setTimeout(() => $t.remove(), 1000);
   }
   // -------------------------------------------------
 
@@ -863,7 +876,10 @@ function loseLifeAndResetBall() {
     ctx.globalAlpha = ball.opacity || 1;
     if (playerImg.complete) {
       const size = ball.radius * 4; // 원래 공 지름만큼 크기
-      ctx.drawImage(playerImg, ball.x - ball.radius, ball.y - ball.radius, size, size);
+      const angle = Math.atan2(mousePos.y - ball.y, mousePos.x - ball.x);
+      ctx.translate(ball.x, ball.y);
+      ctx.rotate(angle);
+      ctx.drawImage(playerImg, -size / 2, -size / 2, size, size);
     } else {
       ctx.beginPath();
       ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 4);
@@ -1065,6 +1081,7 @@ bricks.forEach(b => {
           $wrapper.removeClass("shake")
         }, 300)
         score += 10
+        showFloatingText('+10', b.x + bw / 2, b.y, 'score-text')
         playSFX("SFX/coin.mp3")
         flashBorder("glow-yellow")
         updateScore()
@@ -1265,6 +1282,9 @@ bricks.forEach(b => {
     ball.y += ball.dy;
     // 모든 쓰레기/위성 제거되면 자동 재생성
 if (bricks.filter(b => b.status === 1).length === 0) {
+  ball.dx += ball.dx >= 0 ? 1 : -1;
+  ball.dy += ball.dy >= 0 ? 1 : -1;
+  showFloatingText('Speed Up!', canvas.width/2, canvas.height/2, 'speed-text');
   for (let i = 0; i < 10; i++) {
     const isBad = Math.random() < 0.3;
 
@@ -1312,6 +1332,9 @@ if (bricks.filter(b => b.status === 1).length === 0) {
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
+
+    mousePos.x = x;
+    mousePos.y = y;
 
     paddles.top.x = Math.min(Math.max(padding, x - paddles.top.width / 2), canvas.width - paddles.top.width - padding);
     paddles.bottom.x = Math.min(Math.max(padding, x - paddles.bottom.width / 2), canvas.width - paddles.bottom.width - padding);
