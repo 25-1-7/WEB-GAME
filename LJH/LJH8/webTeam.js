@@ -610,8 +610,14 @@ function runPaddleBrickGame(difficultyValue) {
   playerImg.src = selectedPlayerImage;
   window.playerImg = playerImg;
 // 패들 이미지를 하나의 Image 객체로 미리 로드
-  const barrierImg = new Image();
-  barrierImg.src = "barrier.gif"; 
+  const barrierImages = [];
+  for (let i = 1; i <= 5; i++) {
+    const img = new Image();
+    img.src = `barrier/barrier_${i}.png`;
+    barrierImages.push(img);
+  }
+  let barrierFrame = 0;
+  let barrierCounter = 0;
 
   if (difficulty === 1) goal = 100;
   else if (difficulty === 2) goal = 125;
@@ -793,43 +799,48 @@ if (playerImg.complete) {
   }
 
 function drawPaddles() {
-  for (const key in paddles) {
-    const p = paddles[key]
-    // 패들 중심점 계산
-    const cx = p.x + p.width / 2
-    const cy = p.y + p.height / 2
+  // 애니메이션 프레임 계산
+  barrierCounter++;
+  if (barrierCounter % 5 === 0) {
+    barrierFrame = (barrierFrame + 1) % barrierImages.length;
+  }
+  const barrierImg = barrierImages[barrierFrame];
 
-    ctx.save()
+  for (const key in paddles) {
+    const p = paddles[key];
+    // 패들 중심점 계산
+    const cx = p.x + p.width / 2;
+    const cy = p.y + p.height / 2;
+
+    ctx.save();
     if (key === "left" || key === "right") {
       // 왼쪽·오른쪽 패들은 90도 회전
-      // 회전 축을 패들 중심(cx, cy)로 옮기고, Math.PI/2 만큼 회전
-      ctx.translate(cx, cy)
-      ctx.rotate(Math.PI / 2)
-      // barrierImg 원본이 가로 모양이므로, 회전 후에는 크기를 바꿔야 세로로 보임
+      ctx.translate(cx, cy);
+      ctx.rotate(Math.PI / 2);
       // 변환된 좌표계에 맞춰서 draw
       // 이때 drawImage(x, y, w, h)에서 w=패들 높이, h=패들 너비
       if (barrierImg.complete) {
-        ctx.drawImage(barrierImg,
-          -p.height / 2,   // 회전 후 x 위치: 중심에서 위로(절반 높이) 
-          -p.width / 2,    // 회전 후 y 위치: 중심에서 왼쪽(절반 너비)
-          p.height,        // 회전된 이미지 폭 -> 원래 패들 높이
-          p.width)         // 회전된 이미지 높이 -> 원래 패들 너비
+        ctx.drawImage(
+          barrierImg,
+          -p.height / 2,
+          -p.width / 2,
+          p.height,
+          p.width
+        );
       } else {
-        // 만약 이미지 로드가 완료 안 됐으면 fallback
-        // 원래 패들이 10x100인데 회전했으니 drawRect도 같은 식으로
-        ctx.fillStyle = "white"
-        ctx.fillRect(-p.height / 2, -p.width / 2, p.height, p.width)
+        ctx.fillStyle = "white";
+        ctx.fillRect(-p.height / 2, -p.width / 2, p.height, p.width);
       }
     } else {
       // top, bottom 패들은 가로 모양 그대로 그리기
       if (barrierImg.complete) {
-        ctx.drawImage(barrierImg, p.x, p.y, p.width, p.height)
+        ctx.drawImage(barrierImg, p.x, p.y, p.width, p.height);
       } else {
-        ctx.fillStyle = "white"
-        ctx.fillRect(p.x, p.y, p.width, p.height)
+        ctx.fillStyle = "white";
+        ctx.fillRect(p.x, p.y, p.width, p.height);
       }
     }
-    ctx.restore()
+    ctx.restore();
   }
 }
 
