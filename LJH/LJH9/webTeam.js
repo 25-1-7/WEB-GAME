@@ -444,6 +444,7 @@ function initCanvasGame(difficulty) {
         d.y + d.size > player.y
       ) {
         score += 10;
+        playSFX("SFX/coin.mp3");
         d.y = -20;
         d.x = Math.random() * 740;
       }
@@ -744,6 +745,7 @@ function loseLifeAndResetBall() {
   lives--;
   updateUI();
  flashBorder("glow-red");
+  playSFX("SFX/start.mp3");
   if (lives <= 0) {
     endGame("하트 소진");
     return;
@@ -989,6 +991,7 @@ bricks.forEach(b => {
           $wrapper.removeClass("shake")
         }, 300)
         score += 10
+        playSFX("SFX/coin.mp3")
         flashBorder("glow-yellow")
         updateScore()
       }

@@ -276,6 +276,18 @@ body {
     z-index: 2;
 }
 
+#spaceman {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100px;
+    height: auto;
+    transform: translate(-50%, -50%);
+    animation: float 3s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 1;
+}
+
 .star {
     position: absolute;
     width: 20px;
@@ -299,7 +311,7 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   justify-content: center;
   align-items: center; /* 👉 수직 가운데 정렬 */
@@ -308,24 +320,27 @@ body {
 
 
 .credit-popup {
-    background: white;
-    color: black;
-    padding: 30px;
-    border-radius: 10px;
-    width: 300px;
-    font-family: 'DungGeunMo';
-    text-align: center;
-    position: relative;
-    box-shadow: 0 0 15px #000;
+  background: rgba(0, 0, 0, 0.75);
+  color: #fff;
+  padding: 20px;
+  width: 320px;
+  border: 1px solid #ff0;
+  border-radius: 10px;
+  box-shadow: 0 0 20px #ff0;
+  font-family: 'DungGeunMo';
+  text-align: center;
+  position: relative;
 }
 
 .credit-close {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    font-size: 24px;
-    cursor: pointer;
-    color: black;
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  background: none;
+  border: none;
+  color: #ff0;
+  font-size: 18px;
+  cursor: pointer;
 }
 
 .scenario-img-wrapper {
@@ -549,9 +564,9 @@ body {
   color: #fff;
   padding: 20px;
   width: 320px;
-  border: 1px solid #0ff;
+  border: 1px solid #ff0;
   border-radius: 10px;
-  box-shadow: 0 0 20px #0ff;
+  box-shadow: 0 0 20px #ff0;
   position: relative;
 }
 
@@ -561,7 +576,7 @@ body {
   right: 10px;
   background: none;
   border: none;
-  color: #0ff;
+  color: #ff0;
   font-size: 18px;
   cursor: pointer;
 }
@@ -575,11 +590,19 @@ body {
   border-radius: 5px;
   border: none;
   background: #111;
-  color: #0ff;
+  color: #ff0;
+  accent-color: #ffd700;
+}
+
+#settings input[type="range"]::-webkit-slider-thumb {
+  background: #ffd700;
+}
+#settings input[type="range"]::-moz-range-thumb {
+  background: #ffd700;
 }
 
 #settings button {
-  background: #0ff;
+  background: #ff0;
   color: #000;
   border: none;
   padding: 8px 16px;
@@ -589,6 +612,6 @@ body {
 }
 
 #settings button:hover {
-  background: #00faff;
+  background: #ffd700;
 }
   
