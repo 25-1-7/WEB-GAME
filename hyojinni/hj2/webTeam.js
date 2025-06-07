@@ -763,30 +763,34 @@ function drawPaddles() {
 
 
   function drawBricks() {
-  bricks.forEach(b => {
-    if (b.status === 1) {
-      if (b.img.complete) {
-        ctx.drawImage(b.img, b.x, b.y, brickWidth, brickHeight);
-      } else {
-        ctx.fillStyle = b.bad ? "red" : "gray"; // 로딩 안 됐을 때 대비
-        ctx.fillRect(b.x, b.y, brickWidth, brickHeight);
+    bricks.forEach(b => {
+      if (b.status === 1) {
+        const w = b.renderWidth || brickWidth;
+        const h = b.renderHeight || brickHeight;
+        if (b.img.complete) {
+          ctx.drawImage(b.img, b.x, b.y, w, h);
+        } else {
+          ctx.fillStyle = b.bad ? "red" : "gray"; // 로딩 안 됐을 때 대비
+          ctx.fillRect(b.x, b.y, w, h);
+        }
+        if (b.bad) {
+          ctx.lineWidth = 2;
+          ctx.strokeStyle = "red";
+          ctx.strokeRect(b.x, b.y, w, h);
+        }
       }
-      if (b.bad) {
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = "red";
-        ctx.strokeRect(b.x, b.y, brickWidth, brickHeight);
-      }
-    }
-  });
-}
+    });
+  }
 
   function moveBricks() {
     bricks.forEach(b => {
       if (b.status === 1) {
+        const w = b.renderWidth || brickWidth;
+        const h = b.renderHeight || brickHeight;
         b.x += b.dx;
         b.y += b.dy;
-        if (b.x < 0 || b.x + brickWidth > canvas.width) b.dx *= -1;
-        if (b.y < 0 || b.y + brickHeight > canvas.height) b.dy *= -1;
+        if (b.x < 0 || b.x + w > canvas.width) b.dx *= -1;
+        if (b.y < 0 || b.y + h > canvas.height) b.dy *= -1;
       }
     });
   }
@@ -817,71 +821,73 @@ function drawPaddles() {
 
 function collisionDetection() {
   bricks.forEach(b => {
-    if (
-      b.status === 1 &&
-      ball.x > b.x &&
-      ball.x < b.x + brickWidth &&
-      ball.y > b.y &&
-      ball.y < b.y + brickHeight
-    ) {
-      b.status = 0;
-      ball.dy = -ball.dy;
+    if (b.status === 1) {
+      const w = b.renderWidth || brickWidth;
+      const h = b.renderHeight || brickHeight;
 
-      // 인공위성 부딪힘이면 강한 흔들림, 아니면 기본 흔들림
-      const $wrapper = $("#game-wrapper")
-      if (b.type === "satellite") {
-        $wrapper.addClass("shake-strong")
-        setTimeout(() => {
-          $wrapper.removeClass("shake-strong")
-        }, 400) // 애니메이션 길이와 맞춤
-        // 이후 파편 생성 로직…
-      } else {
-        // trash/debris 충돌 시 기본 shake
-        $wrapper.addClass("shake")
-        setTimeout(() => {
-          $wrapper.removeClass("shake")
-        }, 300)
-        score += 10
-        flashBorder("glow-yellow")
-        updateScore()
-      }
+      if (
+        ball.x + ball.radius > b.x &&
+        ball.x - ball.radius < b.x + w &&
+        ball.y + ball.radius > b.y &&
+        ball.y - ball.radius < b.y + h
+      ) {
+        b.status = 0;
 
-      if (b.type === "satellite") {
-  const debrisList = [
-    "satellite/debris1.png",
-    "satellite/debris2.png",
-    "satellite/debris3.png",
-    "satellite/debris4.png"
-  ];
-  // 점수 차감
-  score = Math.max(0, score - 20); // 최소 0점 유지
-  updateScore(); // UI 갱신
-  setTimeout(() => {
-    debrisList.forEach(debrisSrc => {
-      const debrisImg = new Image();
-      debrisImg.src = debrisSrc;
+        // 충돌 방향 계산
+        const cx = b.x + w / 2;
+        const cy = b.y + h / 2;
+        const diffX = ball.x - cx;
+        const diffY = ball.y - cy;
 
-      bricks.push({
-        x: b.x + Math.random() * 30 - 15,
-        y: b.y + Math.random() * 30 - 15,
-        dx: (Math.random() - 0.5) * 2,
-        dy: (Math.random() - 0.5) * 2,
-        status: 1,
-        type: "debris",
-        img: debrisImg,
-        src: debrisSrc
-      });
-    });
-  }, 1000);
-}
+        if (Math.abs(diffX) > Math.abs(diffY)) {
+          ball.dx = diffX > 0 ? Math.abs(ball.dx) : -Math.abs(ball.dx);
+        } else {
+          ball.dy = diffY > 0 ? Math.abs(ball.dy) : -Math.abs(ball.dy);
+        }
 
+        const $wrapper = $("#game-wrapper");
+        if (b.type === "satellite") {
+          $wrapper.addClass("shake-strong");
+          setTimeout(() => {
+            $wrapper.removeClass("shake-strong");
+          }, 400);
 
-    else {
-        // trash or debris
-        score += 10;
-         flashBorder("glow-yellow");
-        updateScore();
-      }
+          const debrisList = [
+            "satellite/debris1.png",
+            "satellite/debris2.png",
+            "satellite/debris3.png",
+            "satellite/debris4.png"
+          ];
+
+          score = Math.max(0, score - 20);
+          updateScore();
+
+          setTimeout(() => {
+            debrisList.forEach(debrisSrc => {
+              const debrisImg = new Image();
+              debrisImg.src = debrisSrc;
+
+              bricks.push({
+                x: b.x + Math.random() * 30 - 15,
+                y: b.y + Math.random() * 30 - 15,
+                dx: (Math.random() - 0.5) * 2,
+                dy: (Math.random() - 0.5) * 2,
+                status: 1,
+                type: "debris",
+                img: debrisImg,
+                src: debrisSrc
+              });
+            });
+          }, 1000);
+        } else {
+          $wrapper.addClass("shake");
+          setTimeout(() => {
+            $wrapper.removeClass("shake");
+          }, 300);
+          score += 10;
+          flashBorder("glow-yellow");
+          updateScore();
+        }
     }
   });
 }
