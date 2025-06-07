@@ -1390,9 +1390,10 @@ function applySettings() {
   }
 
   if (bgmGame.src.indexOf(selectedBgm) === -1) {
+    const wasPlaying = !bgmGame.paused;
     bgmGame.src = `BGM/${selectedBgm}`;
     bgmGame.load();
-    if (bgmToggle) {
+    if (bgmToggle && wasPlaying) {
       bgmGame.play().catch(()=>{});
     }
   }
