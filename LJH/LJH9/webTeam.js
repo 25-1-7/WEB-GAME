@@ -512,12 +512,25 @@ const starPositions = [
   { top: "250px", left: "300px" }
 ];
 
+// 별 깜빡임 이미지를 순서대로 담은 배열
+const starFrames = [
+  "star/star1.png",
+  "star/star2.png",
+  "star/star3.png",
+  "star/star4.png",
+  "star/star5.png",
+  "star/star6.png",
+  "star/star7.png",
+  "star/star8.png"
+];
+
 const $starContainer = $("<div>").addClass("star-container");
 
 starPositions.forEach((pos, i) => {
   const delay = Math.random().toFixed(2);
   const $star = $("<img>")
-    .attr("src", "star.png")
+    // 애니메이션의 첫 프레임으로 초기화
+    .attr("src", starFrames[0])
     .addClass("star")
     .css({
       top: pos.top,
@@ -525,6 +538,13 @@ starPositions.forEach((pos, i) => {
       animationDelay: `${delay}s`
     });
   $starContainer.append($star);
+
+  // 각 별에 대해 프레임을 교체하며 깜빡임 애니메이션 적용
+  let frameIndex = 0;
+  setInterval(() => {
+    frameIndex = (frameIndex + 1) % starFrames.length;
+    $star.attr("src", starFrames[frameIndex]);
+  }, 200);
 });
 
 $(".background").append($starContainer);
