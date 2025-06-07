@@ -276,6 +276,18 @@ body {
     z-index: 2;
 }
 
+#spaceman {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100px;
+    height: auto;
+    transform: translate(-50%, -50%);
+    animation: float 3s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 1;
+}
+
 .star {
     position: absolute;
     width: 20px;
