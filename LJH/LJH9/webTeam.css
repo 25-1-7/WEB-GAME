@@ -584,6 +584,12 @@ body {
   border-radius: 10px;
   box-shadow: 0 0 20px #ff0;
   position: relative;
+  font-family: 'DungGeunMo';
+}
+
+/* settings 내부 텍스트도 동일한 도트 폰트 사용 */
+#settings * {
+  font-family: 'DungGeunMo';
 }
 
 #closeSettingsBtn {
