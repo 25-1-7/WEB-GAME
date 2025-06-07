@@ -126,6 +126,7 @@ for (let i = 1; i <= 8; i++) {
   staticStarFrames.push(img);
 }
 let staticStarFrame = 0;
+let staticStarFrameCounter = 0;
 
 
 const scenarioTexts = [
@@ -754,8 +755,8 @@ if (isBad) {
         status: 1,
         type: "static",
         img: null,
-        renderWidth: 30,
-        renderHeight: 30,
+        renderWidth: 45,
+        renderHeight: 45,
         preserveAspect: true
       });
     });
@@ -947,8 +948,11 @@ function drawPaddles() {
 
 
   function drawBricks() {
-    // 정적 블럭 애니메이션 프레임 업데이트
-    staticStarFrame = (staticStarFrame + 1) % staticStarFrames.length;
+    // 정적 블럭 애니메이션 프레임 업데이트(느리게)
+    staticStarFrameCounter++;
+    if (staticStarFrameCounter % 5 === 0) {
+      staticStarFrame = (staticStarFrame + 1) % staticStarFrames.length;
+    }
     bricks.forEach(b => {
       if (b.status === 1) {
         const bw = b.renderWidth || brickWidth;
