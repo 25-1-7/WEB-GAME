@@ -465,6 +465,10 @@ body {
     width:120px;
 }
 
+#endingBtn{
+    font-family:'DungGeunMo';
+}
+
 #endingBtn.highlight{
     animation: ending-glow 1s infinite;
     border:1px solid yellow;
