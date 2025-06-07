@@ -35,21 +35,29 @@ let sfxVolume = 0.5;
 let selectedPlayerImage = "player/astro_basic.png";
 const GAME_VERSION = "v0.1";
 
+// 문서가 준비되면 실행되는 초기화 코드
+// 버전 정보를 표시하고 이전에 입력된 이름을 불러온다
 $(function() {
   $("#versionTxt").text(GAME_VERSION);
   const lastName = localStorage.getItem("sc_lastName") || "";
   $("#playerNameInput").val(lastName);
 });
 
+// 각 스테이지별 최고 점수를 로컬스토리지에서 가져온다
+// 저장 데이터가 없을 경우 기본 구조를 반환하도록 구현했다
 function getHighScores() {
   const data = localStorage.getItem("sc_highscores");
   return data ? JSON.parse(data) : {1: [], 2: [], 3: []};
 }
 
+// 최고 점수 데이터를 로컬스토리지에 저장하는 함수
+// JSON 문자열로 변환해 간단히 보관한다
 function saveHighScores(obj) {
   localStorage.setItem("sc_highscores", JSON.stringify(obj));
 }
 
+// 새로운 점수를 기록하고 상위 3개만 저장한다
+// 배열 정렬 후 잘라내는 방식으로 구현하였다
 function recordHighScore(stage, name, score) {
   const scores = getHighScores();
   const arr = scores[stage] || [];
@@ -60,15 +68,19 @@ function recordHighScore(stage, name, score) {
   localStorage.setItem("sc_lastName", name);
 }
 
+// 플레이어가 해금한 마지막 스테이지를 반환한다
 function getUnlockedStage() {
   return parseInt(localStorage.getItem("sc_unlockedStage") || "1", 10);
 }
 
+// 새 스테이지를 해금할 때 호출되는 함수
+// 이미 해금된 값보다 클 때만 갱신한다
 function setUnlockedStage(stage) {
   const current = getUnlockedStage();
   if (stage > current) localStorage.setItem("sc_unlockedStage", stage);
 }
 
+// 간단한 메시지 팝업을 화면에 생성한다
 function showPopup(message) {
   const $popup = $(
     `<div class="credit-overlay" id="msgPopup">\n` +
@@ -81,10 +93,12 @@ function showPopup(message) {
   $("body").append($popup);
 }
 
+// 팝업의 닫기 버튼을 누르면 팝업 요소를 제거한다
 $(document).on("click", "#msgPopup .credit-close", function () {
   $("#msgPopup").remove();
 });
 
+// 스테이지별 저장된 최고 점수를 화면에 채워 넣는다
 function populateHighScores() {
   const scores = getHighScores();
   [1, 2, 3].forEach(stage => {
@@ -96,6 +110,7 @@ function populateHighScores() {
   });
 }
 
+// 효과음을 재생하는 유틸리티
 function playSFX(soundFile) {
   if (!sfxEnabled) return;
   const sfx = new Audio(soundFile);
@@ -130,6 +145,8 @@ const scenarioTexts = [
 
 let currentLine = 0;
 
+// 시나리오 진행 화면에 여러 이미지를 겹쳐서 표시하기 위한 함수
+// 이미지 배열을 받아 오버레이 여부를 판단하여 클래스 부여
 function renderScenarioImage(imageList) {
   const $wrapper = $("<div>").addClass("scenario-img-wrapper");
 
@@ -185,6 +202,8 @@ $(document).on("click", ".next-link", function () {
   }
 });
 
+// 게임 화면을 초기화하고 캔버스를 표시한다
+// 난이도 선택 화면 이후 호출된다
 function startCanvasGameUI() {
 
   restoreBg();                       
@@ -234,7 +253,8 @@ $(".content").html('
   */
 
 
-//새 도움말 및 게임설명
+// 게임 설명 슬라이드를 순차적으로 보여주는 함수
+// 배경을 어둡게 하고 이미지와 텍스트를 교체하며 진행한다
 function showStageExplanation() {
   darkenBg();
 
@@ -258,6 +278,8 @@ function showStageExplanation() {
 
   let currentIndex = 0;
 
+  // 현재 인덱스에 맞는 설명 이미지를 구성하여 화면에 출력한다
+  // 이미지 위치나 오버레이 처리를 세밀하게 조정하기 위해 분리된 함수
   function renderExplainSlide(index) {
   const baseImg = explainImages[index];
   const text = explainTexts[index];
@@ -335,7 +357,7 @@ function showStageExplanation() {
 }
 
 
-//스테이지 설명
+// 각 스테이지 규칙을 보여주는 안내 화면을 띄운다
 function showStageObjective() {
   darkenBg();
   $(".content").html(`
@@ -382,7 +404,8 @@ $(document).on("click", "#startBtn", function () {
   runPaddleBrickGame(selectedDifficulty);
 });
 
-//난이도를 선택하는 함수
+// 난이도 선택 화면을 그려 주는 함수
+// 선택 결과는 전역 변수에 저장된다
 function difficultySlection() {
   restoreBg();
   $(".content").html(`
@@ -401,6 +424,7 @@ function difficultySlection() {
 }
 
 
+// 테스트용 간단한 캔버스 게임 로직 (사용되지 않음)
 function initCanvasGame(difficulty) {
   const canvas = document.getElementById("gameCanvas");
   const ctx = canvas.getContext("2d");
@@ -483,10 +507,12 @@ function initCanvasGame(difficulty) {
 }
 
 
+// 시나리오를 건너뛰기 위한 버튼 처리
 $(document).on("click", ".skip-link", function () {
   endScenario();
 });
 
+// 시나리오 종료 후 본 게임 설명 단계로 이동시키는 함수
 function endScenario() {
   $(".scenario").remove();
   $(".background").css("filter", "brightness(1)");
@@ -526,6 +552,7 @@ starPositions.forEach((pos, i) => {
 
 $(".background").append($starContainer);
 
+// 크레딧 버튼 클릭 시 팀 정보를 표시하는 팝업을 띄운다
 $(document).on("click", "#credit", function () {
   const $overlay = $(".credit-overlay");
   if ($overlay.length) {
@@ -545,22 +572,27 @@ $(document).on("click", "#credit", function () {
   }
 });
 
+// 크레딧 팝업을 닫는 이벤트
 $(document).on("click", ".credit-close", function () {
   $(".credit-overlay").remove();
 });
 
+// 설정 창을 열어주는 버튼
 $(document).on("click", "#setting", function () {
   $("#settings-overlay").css("display", "flex");
 });
 
+// 설정 창을 닫는 버튼
 $(document).on("click", "#closeSettingsBtn", function () {
   $("#settings-overlay").css("display", "none");
 });
 
+// 메인 메뉴로 돌아가기 버튼
 $(document).on("click", ".to-main", function () {
   showMainMenu();
 });
 
+// 타이틀 화면을 다시 구성하여 초기 상태로 돌려준다
 function showMainMenu () {
   // 1) 기존 내용 싹 비우기
   $(".content").empty();
@@ -596,7 +628,9 @@ function showMainMenu () {
 
 
 
-/**인 게임 코드 */
+/** 인게임 로직의 핵심 함수
+ *  난이도에 따라 목표 점수와 배치가 달라진다
+ */
 function runPaddleBrickGame(difficultyValue) {
   const canvas = document.getElementById("gameCanvas");
   const ctx = canvas.getContext("2d");
@@ -638,7 +672,8 @@ function runPaddleBrickGame(difficultyValue) {
   };
 
   // -------------------------------------------------
-  // ★ 불빛 효과를 위해 helper 함수 정의
+  // 화면 테두리를 잠깐 빛내는 연출용 헬퍼 함수
+  // 게임 진행 상황을 시각적으로 알리기 위해 사용한다
   function flashBorder(colorClass) {
     // colorClass는 "glow-red" 또는 "glow-yellow"
     $("#game-wrapper").addClass(colorClass);
@@ -730,10 +765,12 @@ bricks.push({
 });
 
 }
+// 점수와 남은 목숨을 UI에 갱신한다
 function updateUI() {
   updateScore();
   $("#lifeBoard").text(`[HP: ${"■".repeat(lives)}]`);
 }
+// 목숨을 하나 줄이고 공을 중앙으로 재배치한다
 function loseLifeAndResetBall() {
   lives--;
   updateUI();
@@ -752,6 +789,7 @@ function loseLifeAndResetBall() {
 
 
 
+  // 현재 점수와 목표 달성 여부에 따라 UI를 조정한다
   function updateScore() {
     $("#scoreBoard").text(`[score: ${score}]`);
     if (score >= goal) {
@@ -770,14 +808,17 @@ function loseLifeAndResetBall() {
     }
   }
 
+  // 남은 시간을 표시한다
   function updateTimer() {
     $("#timerBoard").text(`[time: ${timeLeft}s]`);
   }
 
+  // 목표 점수를 단순히 화면에 보여주는 함수
   function updateGoal() {
     $("#goalBoard").text(`[goal: ${goal}]`);
   }
 
+  // 플레이어 캐릭터(공)을 그린다. 이미지 로딩 상태에 따라 대체 그래픽을 사용
   function drawBall() {
 if (playerImg.complete) {
     const size = ball.radius * 4  // 원래 공 지름만큼 크기
@@ -792,6 +833,7 @@ if (playerImg.complete) {
   }
   }
 
+// 사방의 패들을 그림. 좌우 패들은 회전을 통해 이미지 방향을 맞춘다
 function drawPaddles() {
   for (const key in paddles) {
     const p = paddles[key]
@@ -834,6 +876,7 @@ function drawPaddles() {
 }
 
 
+  // 쓰레기와 위성 이미지를 캔버스에 그린다
   function drawBricks() {
     bricks.forEach(b => {
       if (b.status === 1) {
@@ -855,6 +898,7 @@ function drawPaddles() {
     });
   }
 
+  // 움직이는 쓰레기 및 위성의 위치를 갱신하고 충돌을 처리한다
   function moveBricks() {
     bricks.forEach(b => {
       if (b.status === 1 && b.type !== "static") {
@@ -884,6 +928,7 @@ function drawPaddles() {
     });
   }
 
+  // 충돌 시 파편 효과를 위해 작은 점들을 흩뿌린다
   function scatterDebris(x, y) {
     for (let i = 0; i < greenHitCount; i++) {
       ctx.beginPath();
@@ -894,6 +939,7 @@ function drawPaddles() {
     }
   }
 
+  // 한 지점을 기준으로 여러 개의 작은 블록을 생성한다
   function spawnBricks(base) {
     const count = Math.floor(Math.random() * 4) + 3;
     for (let i = 0; i < count; i++) {
@@ -908,6 +954,7 @@ function drawPaddles() {
     }
   }
 
+// 공과 각종 블록의 충돌을 계산해 반사와 파괴를 처리한다
 function collisionDetection() {
   // 공과 static 블럭 충돌 체크 (수동)
 bricks.forEach(b => {
@@ -1041,6 +1088,7 @@ bricks.forEach(b => {
 }
 
 
+  // 네 방향 패들과 공의 충돌을 체크한다
   function checkPaddleCollision() {
     const { top, bottom, left, right } = paddles;
 
@@ -1099,6 +1147,7 @@ bricks.forEach(b => {
     return false;
   }
 
+  // 게임 종료 처리 및 점수 저장을 담당
   function endGame(where) {
     isGameRunning = false;
     clearInterval(timer);
@@ -1115,6 +1164,7 @@ bricks.forEach(b => {
   }
   
 
+  // 매 프레임 호출되어 게임 화면을 갱신한다
   function draw() {
     if (!isGameRunning) return;
 
@@ -1265,7 +1315,8 @@ if (bricks.filter(b => b.status === 1).length === 0) {
 }
 
 
-//게임오버 함수
+// 공통 엔딩 화면을 생성하는 함수
+// 이미지와 문구 배열을 받아 다양한 엔딩에 재사용한다
 function showCustomEnding(score, imagePath, messageLines) {
   darkenBg();
 
@@ -1293,11 +1344,11 @@ function showCustomEnding(score, imagePath, messageLines) {
   }, 100);
 }
 
-//달이 날아가는 엔딩
+// 달이 멀어지는 게임오버 연출
 function showGameOver(score) {
   showCustomEnding(score, "moon2.png", ["앗! 달이 날아갔습니다!!"]);
 }
-//우주인 날아가는 엔딩
+// 플레이어가 우주로 사라지는 특별 엔딩
 function showSpecialEnding(score) {
   showCustomEnding(score, "exImg/exImg01.png", [
     "우주청소부는 돌아오지 못했습니다.",
@@ -1314,6 +1365,7 @@ const endingTexts = [
 const endingImage = "ending.png";
 let endingLine = 0;
 
+// 게임 클리어 후 축하 메시지와 점수를 보여주는 엔딩 처리
 function showEnding(score) {
   darkenBg();
   endingLine = -1; // 첫 문장은 별도 처리 > -1부터 시작
@@ -1338,6 +1390,7 @@ function showEnding(score) {
   $(".content").append($scenario);
 }
 
+// 엔딩 화면에서 다음 문장을 표시하는 버튼
 $(document).on("click", ".ending-next", function () {
   endingLine++;
 
@@ -1354,6 +1407,7 @@ $(document).on("click", ".to-main", function () {
   showMainMenu(); // 메인으로 이동
 });
 
+// 엔딩 화면에서 게임을 다시 시작하는 버튼
 $(document).on("click", ".restart-game", function () {
   $(".background").show();
   $(".background").css("filter", "brightness(0.3)");
@@ -1363,14 +1417,16 @@ $(document).on("click", ".restart-game", function () {
 });
 
 
-//페이드인,아웃 관련 함수
+// 배경을 어둡게 만들어 팝업이나 시나리오 연출에 사용
 function darkenBg(){
   $(".background").show().css("filter","brightness(0.3)");
 }
+// 어둡게 한 배경을 원래대로 돌리는 함수
 function restoreBg(){
   $(".background").css("filter","brightness(1)");
 }
 
+// 설정 창에서 입력된 옵션을 실제 게임에 반영
 function applySettings() {
   const volume = parseFloat($("#bgmVolume").val());
   const bgmToggle = $("#bgmToggle").is(":checked");
