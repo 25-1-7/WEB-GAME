@@ -745,6 +745,7 @@ function loseLifeAndResetBall() {
   lives--;
   updateUI();
  flashBorder("glow-red");
+  playSFX("SFX/start.mp3");
   if (lives <= 0) {
     endGame("하트 소진");
     return;
