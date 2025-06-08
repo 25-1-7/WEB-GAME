@@ -634,7 +634,7 @@ function showMainMenu () {
 
 
 
-/**인 게임 코드 */
+/*인 게임 코드 */
 function runPaddleBrickGame(difficultyValue) {
   const canvas = document.getElementById("gameCanvas");
   const ctx = canvas.getContext("2d");
@@ -689,7 +689,7 @@ function runPaddleBrickGame(difficultyValue) {
   let mousePos = { x: canvas.width / 2, y: canvas.height / 2 };
 
   // -------------------------------------------------
-  // ★ 불빛 효과를 위해 helper 함수 정의
+  // 불빛 효과를 위해 helper 함수 정의
   function flashBorder(colorClass) {
     // colorClass는 "glow-red" 또는 "glow-yellow"
     $("#game-wrapper").addClass(colorClass);
@@ -914,7 +914,7 @@ function loseLifeAndResetBall() {
     ctx.save();
     ctx.globalAlpha = ball.opacity || 1;
     if (playerImg.complete) {
-      const size = ball.radius * 4; // 원래 공 지름만큼 크기
+      const size = ball.radius * 4; // 우주비행사 크기 비율
       const angle = Math.atan2(mousePos.y - ball.y, mousePos.x - ball.x);
       ctx.translate(ball.x, ball.y);
       ctx.rotate(angle);
@@ -1078,15 +1078,6 @@ bricks.forEach(b => {
     ball.y - ball.radius < b.y + bh;
 
   if (isColliding) {
-    // 충돌 방향 계산
-    const overlapX = Math.min(ball.x + ball.radius - b.x, b.x + bw - (ball.x - ball.radius));
-    const overlapY = Math.min(ball.y + ball.radius - b.y, b.y + bh - (ball.y - ball.radius));
-
-    if (overlapX < overlapY) {
-      ball.dx *= -1;
-    } else {
-      ball.dy *= -1;
-    }
 
     // 블럭 파괴 처리
     b.status = 0;
@@ -1169,26 +1160,9 @@ bricks.forEach(b => {
       }
     else if (b.type !== "static") {
         // trash or debris
-        // 공이 정적 블럭과 충돌했을 때 확실하게 튕기기
+        // 공이 정적 블럭과 충돌했을 때는 튕기지 않음
  // 공이 static 블럭에 부딪힘
-  const prevX = ball.x - ball.dx;
-  const prevY = ball.y - ball.dy;
 
-  const fromLeft = prevX + ball.radius <= b.x;
-  const fromRight = prevX - ball.radius >= b.x + bw;
-  const fromTop = prevY + ball.radius <= b.y;
-  const fromBottom = prevY - ball.radius >= b.y + bh;
-
-  // 우선순위: 좌우 → 상하
-  if (fromLeft || fromRight) {
-    ball.dx *= -1;
-  } else if (fromTop || fromBottom) {
-    ball.dy *= -1;
-  } else {
-    // 예외적으로 대각선 or 중심박힘 → 둘 다 반전
-    ball.dx *= -1;
-    ball.dy *= -1;
-  }
 
   b.status = 0;
          flashBorder("glow-blue");
@@ -1291,8 +1265,8 @@ bricks.forEach(b => {
         ball.dx = Math.abs(ball.dx);
       } else {
         loseLifeAndResetBall();
-        requestAnimationFrame(draw);  // ★ 충돌 후에도 다음 프레임 요청
-        return;                     // ★ 여기서 return 해야 아래 코드가 실행되지 않음
+        requestAnimationFrame(draw);  // 충돌 후에도 다음 프레임 요청
+        return;             
       }
     }
     if (ball.x + ball.radius >= canvas.width) {
