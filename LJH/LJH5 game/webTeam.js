@@ -920,7 +920,7 @@ function restoreBg(){
   $(".background").css("filter","brightness(1)");
 }
 
-// ✅ 설정창 기능 통합 (기존 #setting 버튼과 연결)
+// 설정창 기능 통합 (기존 #setting 버튼과 연결)
 $(document).on("click", "#setting", function () {
   $("#settings-overlay").fadeIn();
 });
@@ -935,7 +935,7 @@ $(document).on("click", ".color-btn", function () {
   $("#selectedColor").val($(this).data("color"));
 });
 
-// ✅ 설정 적용 함수 (전역 등록)
+// 설정 적용 함수 (전역 등록)
 function applySettings() {
   const bgmFile = $("#bgmSelect").val();
   const bgmToggle = $("#bgmToggle").is(":checked");
