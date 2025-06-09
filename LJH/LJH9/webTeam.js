@@ -49,6 +49,8 @@ let sfxEnabled = true;
 let sfxVolume = 0.5;
 let selectedPlayerImage = "player/astro_basic.png";
 const GAME_VERSION = "v0.1";
+// 현재 진행 중인 스테이지 번호 (자동 진행을 위해 추가)
+let currentStage = 1;
 
 $(function() {
   $("#versionTxt").text(GAME_VERSION);
@@ -640,6 +642,8 @@ function runPaddleBrickGame(difficultyValue) {
   const ctx = canvas.getContext("2d");
 
   const difficulty = parseInt(difficultyValue || "1");
+  // 현재 스테이지 기록
+  currentStage = difficulty;
   const padding = 20;
   const brickWidth = 75;
   const brickHeight = 20;
@@ -1502,7 +1506,13 @@ $(document).on("click", ".ending-next", function () {
   if (endingLine < endingTexts.length) {
     $(".scenario-text").text(endingTexts[endingLine]);
   } else {
-    showMainMenu(); // 끝나면 메인으로
+    if (currentStage < 3) {
+      // 다음 스테이지 자동 시작
+      startCanvasGameUI();
+      runPaddleBrickGame(currentStage + 1);
+    } else {
+      showMainMenu(); // 마지막 스테이지 이후엔 메인으로
+    }
   }
 });
 
